@@ -1,0 +1,13 @@
+# idea files
+.idea/
+
+# gifs and pictures
+*.gif
+*.png
+*.jpg
+
+# cache
+__pycache__/
+
+# ds store
+.DS_Store
