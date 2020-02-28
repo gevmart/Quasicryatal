@@ -2,11 +2,11 @@ import numpy as np
 
 GRID_SIZE = 300
 WAVELENGTH = 100
-V_0_REL = 5 * 10 ** 1  # Convenient to measure potential in recoil units
+V_0_REL = 1 * 4 * 10 ** -20  # Convenient to measure potential in recoil units
 M = 1
-WAVEPACKET_CENTER_X = 103
-WAVEPACKET_CENTER_Y = -103
-TIME_STEP_REL = 0.1
+WAVEPACKET_CENTER_X = 0
+WAVEPACKET_CENTER_Y = -0
+TIME_STEP_REL = 0.0000000000001
 NORM = 'ortho'
 
 k = 2 * np.pi / WAVELENGTH

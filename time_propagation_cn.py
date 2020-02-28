@@ -23,8 +23,10 @@ def make_cn_matrix(diag, off_diag):
 
     sup = np.repeat(off_diag, GRID_SIZE ** 2)  # above the main diagonal
     sub = np.repeat(off_diag, GRID_SIZE ** 2)  # below the main diagonal
-    sup[0] = 0
-    sub[-1] = 0
+    # very important as not doing this results in making not neighbours become neighbours
+    # which results in loss of unitarity near the edges:q
+    sup[::GRID_SIZE] = 0
+    sub[-1::GRID_SIZE] = 0
     return np.array([sup, np.repeat(diag, GRID_SIZE ** 2), sub])
 
 
@@ -37,7 +39,7 @@ def multiply_tridiagonal(matrix, arr):
     :return: an array resulting from the multiplication
     """
 
-    return np.roll(arr * matrix[0], -1) + arr * matrix[1] + np.roll(arr * matrix[0], 1)
+    return np.roll(arr * matrix[0], -1) + arr * matrix[1] + np.roll(arr * matrix[2], 1)
 
 
 base_tridiagonal_future = make_cn_matrix(1, future_coupling)
@@ -50,12 +52,19 @@ def diag_time_dependent(t, transpose=False):
 
 
 def apply_half_step(wavefunction, t, transpose=False):
+    """
+    Applies half step propagation in Crank-Nicholson scheme. If transpose is true, it is the second half being applied
+
+    :param wavefunction: the initial wavefunction
+    :param t: time
+    :param transpose: indicates whether it's the first or the second step of the process
+    :return: wavefunction after half step propagation
+    """
+
     present_diag = 1 - diag_time_dependent(t, transpose)  # present diagonal
     future_diag = 1 + diag_time_dependent(t + time_step / 2, transpose)  # future diagonal
     base_tridiagonal_future[1] = np.reshape(future_diag, GRID_SIZE ** 2)
     base_tridiagonal_present[1] = np.reshape(present_diag, GRID_SIZE ** 2)
-    rhs = multiply_tridiagonal(base_tridiagonal_present, wavefunction)
-    print("rhs", np.sum(np.abs(rhs) ** 2))
     wavefunction = solve_banded((1, 1), base_tridiagonal_future,
                                 multiply_tridiagonal(base_tridiagonal_present, wavefunction))
     return np.reshape(wavefunction, (GRID_SIZE, GRID_SIZE))
@@ -65,10 +74,9 @@ def propagate_cn(wavefunction, t, n):
     for i in np.arange(n):
         wavefunction = np.reshape(wavefunction, GRID_SIZE ** 2)
         wavefunction = apply_half_step(wavefunction, t + i * time_step)
-        print("first", np.sum(np.abs(wavefunction) ** 2))
 
         wavefunction = np.reshape(wavefunction.T, GRID_SIZE ** 2)
         wavefunction = apply_half_step(wavefunction, t + (i + 1 / 2) * time_step, True).T
-        print("second", np.sum(np.abs(wavefunction) ** 2))
+        print(np.sum(np.abs(wavefunction) ** 2))
 
     return wavefunction

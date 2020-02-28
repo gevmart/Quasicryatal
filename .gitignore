@@ -5,9 +5,12 @@
 *.gif
 *.png
 *.jpg
+Plots
 
 # cache
 __pycache__/
 
 # ds store
 .DS_Store
+
+

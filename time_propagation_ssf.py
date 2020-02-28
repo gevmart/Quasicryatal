@@ -10,4 +10,6 @@ def propagate_ssf(wavefunction, t, n):
         wavefunction = np.fft.ifft2(np.fft.fftshift(wavefunction), norm=NORM)
         wavefunction *= np.exp(-1j * generate_potential(t + i * time_step + time_step / 2) * time_step / 2)
 
+        print(np.sum(np.abs(wavefunction) ** 2 * (x ** 2 + y ** 2)))
+
     return wavefunction

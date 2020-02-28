@@ -12,11 +12,11 @@ x, y = np.meshgrid(
 def generate_potential(t):
     n = 10
 
-    return phase_single_laser(t, n)
+    return propagate_sliding(t, n)
 
 
 def propagate_sliding(t, n):
-    x_t, y_t = propagate_square(t, n)
+    x_t, y_t = slide_x(t, n)
 
     return -v_0 / 4 * (
             np.cos(k * x_t) ** 2 +
