@@ -1,6 +1,7 @@
 import numpy as np
+import math
 
-from config import GRID_SIZE, WAVELENGTH, v_0, omega, k
+from config import GRID_SIZE, WAVELENGTH, v_0, omega, k, v_rec
 
 # %%
 x, y = np.meshgrid(
@@ -9,28 +10,88 @@ x, y = np.meshgrid(
 
 
 # %%
-def generate_potential(t):
+def generate_potential(t, v=float('nan')):
+    """
+    Generates the potential at time t
+    :param t: time
+    :param v: optionally takes the strength of the potential, or uses the default from config
+    :return: the potential grid at time t
+    """
     n = 10
 
-    return propagate_sliding(t, n)
+    v = v_0 if math.isnan(v) else v * v_rec
+
+    p1, p2, p3, p4 = phase_single_square(t, n)
+
+    return -v / 4 * (
+            np.cos(p1) ** 2 +
+            np.cos(p2) ** 2 +
+            np.cos(p3) ** 2 +
+            np.cos(p4) ** 2)
 
 
 def propagate_sliding(t, n):
+    """
+    Slides the potential to have a new center keeping the form of the potential
+    :param t: time
+    :param n: quantifies the rate of change of the potential
+    :return: the phases of the lasers
+    """
     x_t, y_t = slide_x(t, n)
 
-    return -v_0 / 4 * (
-            np.cos(k * x_t) ** 2 +
-            np.cos(k * y_t) ** 2 +
-            np.cos(k / 2 ** 0.5 * (x_t + y_t)) ** 2 +
-            np.cos(k / 2 ** 0.5 * (x_t - y_t)) ** 2)
+    return k * x_t, k * y_t, k / 2 ** 0.5 * (x_t + y_t), k / 2 ** 0.5 * (x_t - y_t)
 
 
 def slide_x(t, n):
+    """
+    Slides the potential along negative x direction
+    :param t: time
+    :param n: slide speed measure
+    :return: new center position
+    """
     return x + t * omega / n / k, y
 
 
 def propagate_square(t, n):
-    cutoff = n
+    """
+    Slides the potential in a square (left, up, right, down)
+    :param t: time
+    :param n: slide speed measure
+    :return: new center position
+    """
+    return square_movement(t, n)
+
+
+def phase_single_laser(t, n):
+    """
+    Changes the phase of the laser which is along x direction
+    :param t: time
+    :param n: potential change measure
+    :return: phases of the lasers
+    """
+    return k * (x + t * omega / n / k), k * y, k / 2 ** 0.5 * (x + y), k / 2 ** 0.5 * (x - y)
+
+
+def phase_single_square(t, n):
+    """
+    Changes the phases of the lasers along x and y direction in a square fashion
+    :param t: time
+    :param n: potential change measure
+    :return: phases of the lasers
+    """
+    p1_rel, p2_rel = square_movement(t, n, 30)
+
+    return k * p1_rel, k * p2_rel, k / 2 ** 0.5 * (x + y), k / 2 ** 0.5 * (x - y)
+
+
+def square_movement(t, n, cutoff=10):
+    """
+    Makes a square movement in some coordinates
+    :param t: time
+    :param n: potential change measure
+    :param cutoff: indicates thw size of the square
+    :return: final values of moving coordinates
+    """
     x_t, y_t = x, y
     if t * omega < cutoff:
         x_t = x + t * omega / n / k
@@ -46,14 +107,6 @@ def propagate_square(t, n):
         y_t = y + (4 * cutoff - t * omega) / n / k
 
     return x_t, y_t
-
-
-def phase_single_laser(t, n):
-    return -v_0 / 4 * (
-            np.cos(k * (x + t * omega / n / k)) ** 2 +
-            np.cos(k * y) ** 2 +
-            np.cos(k / 2 ** 0.5 * (x + y)) ** 2 +
-            np.cos(k / 2 ** 0.5 * (x - y)) ** 2)
 
 
 # %%
