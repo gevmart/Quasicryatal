@@ -19,4 +19,3 @@ fig, ax = plt.subplots()
 heatmap(inversed, x * k_step, y * k_step, ax=ax, cbarlabel="s")
 
 plt.show()
-

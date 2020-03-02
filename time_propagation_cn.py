@@ -2,6 +2,7 @@ from scipy.linalg import inv, solve_banded
 
 from config import *
 from grid import x, y, generate_potential
+from utils import calc_center_of_mass
 
 
 #%%
@@ -72,11 +73,13 @@ def apply_half_step(wavefunction, t, v, transpose=False):
 
 
 def propagate_cn(wavefunction, t, n, v=float('nan')):
+    avg = np.array([0.0, 0.0])
     for i in np.arange(n):
         wavefunction = np.reshape(wavefunction, GRID_SIZE ** 2)
         wavefunction = apply_half_step(wavefunction, t + i * time_step, v)
 
         wavefunction = np.reshape(wavefunction.T, GRID_SIZE ** 2)
         wavefunction = apply_half_step(wavefunction, t + (i + 1 / 2) * time_step, v, True).T
+        avg = (avg * i + calc_center_of_mass(wavefunction)) / (i + 1)
 
-    return wavefunction
+    return wavefunction, avg

@@ -1,8 +1,8 @@
 import numpy as np
 
-GRID_SIZE = 300
+GRID_SIZE = 500
 WAVELENGTH = 100
-V_0_REL = 3 * 4 * 10 ** 0  # Convenient to measure potential in recoil units
+V_0_REL = 5 * 4 * 10 ** 0  # Convenient to measure potential in recoil units
 M = 1
 WAVEPACKET_CENTER_X = 0
 WAVEPACKET_CENTER_Y = -0

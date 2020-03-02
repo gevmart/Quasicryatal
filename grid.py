@@ -72,27 +72,47 @@ def phase_single_laser(t, n):
     return k * (x + t * omega / n / k), k * y, k / 2 ** 0.5 * (x + y), k / 2 ** 0.5 * (x - y)
 
 
-def phase_single_square(t, n):
+def phase_single_square(t, n, cutoff=30, start=0):
     """
     Changes the phases of the lasers along x and y direction in a square fashion
     :param t: time
     :param n: potential change measure
+    :param cutoff: optional size of the square
+    :param start: start time of the square movement
     :return: phases of the lasers
     """
-    p1_rel, p2_rel = square_movement(t, n, 30)
+    p1_rel, p2_rel = square_movement(t, n, cutoff, start)
 
     return k * p1_rel, k * p2_rel, k / 2 ** 0.5 * (x + y), k / 2 ** 0.5 * (x - y)
 
 
-def square_movement(t, n, cutoff=10):
+def phase_square_and_reverse(t, n, cutoff=30):
+    """
+    Changes the phases of the lasers along x and y directions in a square fashion, then unwinds the square back.
+    It is expected that this action should results in no net movement
+    :param t: time
+    :param n: potential change measure
+    :param cutoff: optional size of the square
+    :return: phases of the lasers
+    """
+    if t * omega < 4 * cutoff:
+        return phase_single_square(t, n, cutoff)
+
+    p1, p2, p3, p4 = phase_single_square(t, n, cutoff, 4 * cutoff)
+    return p2 - k * y + k * x, p1 - k * x + k * y, p3, p4
+
+
+def square_movement(t, n, cutoff=10, start=0):
     """
     Makes a square movement in some coordinates
     :param t: time
     :param n: potential change measure
     :param cutoff: indicates thw size of the square
+    :param start: time from which to start the square motion of the potential
     :return: final values of moving coordinates
     """
     x_t, y_t = x, y
+    t = t - start / omega
     if t * omega < cutoff:
         x_t = x + t * omega / n / k
         y_t = y
@@ -107,6 +127,17 @@ def square_movement(t, n, cutoff=10):
         y_t = y + (4 * cutoff - t * omega) / n / k
 
     return x_t, y_t
+
+
+def potential_ten_fold(t, v=float('nan')):
+    v = v_0 if math.isnan(v) else v * v_rec
+
+    lasers_number = 5
+    angles = np.arange(lasers_number) * np.pi / lasers_number
+
+    kxs, kys = k * np.cos(angles), k * np.sin(angles)
+
+    return -v / lasers_number * np.sum(np.cos(np.outer(x, kxs) + np.outer(y, kys)) ** 2, axis=1).reshape((GRID_SIZE, GRID_SIZE))
 
 
 # %%
