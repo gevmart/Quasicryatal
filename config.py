@@ -1,14 +1,15 @@
 import numpy as np
 
+METHOD = "ssf"
 GRID_SIZE = 500
 WAVELENGTH = 100
 V_0_REL = 5 * 4 * 10 ** 0  # Convenient to measure potential in recoil units
 M = 1
-WAVEPACKET_CENTER_X = 0
-WAVEPACKET_CENTER_Y = -0
-TIME_STEP_REL = 0.1
+WAVEPACKET_CENTER_X = 104
+WAVEPACKET_CENTER_Y = 104
+TIME_STEP_REL = 0.02
 NORM = 'ortho'
-PLOT_SAVE_DIR_BASE = "/Users/gevorg/workspace/PartIII/Project/Plots/"
+PLOT_SAVE_DIR_BASE = "/home/ubuntu/environment/quasicrystal/"
 
 k = 2 * np.pi / WAVELENGTH
 v_rec = k ** 2 / (2 * M)  # working in units of h_bar = 1

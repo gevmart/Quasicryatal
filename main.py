@@ -4,16 +4,14 @@ import time
 from matplotlib import pyplot as plt, colors, animation
 
 import plotting
-from config import time_step, WAVELENGTH, PLOT_SAVE_DIR_BASE, V_0_REL, v_rec
-from grid import potential, x, y, minima, generate_potential, mins_only
+from config import *
+from grid import x, y, generate_potential, POTENTIAL_CHANGE_SPEED, CUTOFF
 from generate_wavepacket import wavepacket
 from time_propagation_ssf import propagate_ssf
 from time_propagation_cn import propagate_cn
 from utils import copy_code, calc_center_of_mass
 
 # %%
-METHOD = "ssf"
-
 propagate = propagate_cn if METHOD == "cn" else propagate_ssf
 
 wavefunction = wavepacket
@@ -61,7 +59,8 @@ def save_com_to_file(steps, v=float('nan')):
     n = 10
     t = 0
 
-    directory_to_save = "{}square_single_phases_side_minimum_{}/".format(PLOT_SAVE_DIR_BASE, METHOD)
+    directory_to_save = "{}square_single_phases_x_{}_y_{}_{}_n={}_cutoff_{}_relaxed_10_low_timestep/".format(
+        PLOT_SAVE_DIR_BASE, WAVEPACKET_CENTER_X, WAVEPACKET_CENTER_Y, METHOD, POTENTIAL_CHANGE_SPEED, CUTOFF)
     copy_code(directory_to_save)
 
     for i in np.arange(steps):
@@ -70,14 +69,14 @@ def save_com_to_file(steps, v=float('nan')):
         avg = (avg * (i % 10) + com) / (i % 10 + 1)
         if i % 10 == 9:
             with open("{}data.txt".format(directory_to_save), 'a') as file:
-                file.write(str(avg) + os.linesep)
+                file.write(str(avg) + "   " + str(t) + "  " + str(time.time()) + os.linesep)
             avg = np.array([0.0, 0.0])
 
 
-print(time.time())
-save_com_to_file(1200)
+print("Start", time.time())
+save_com_to_file(6000)
 # calcualte_and_plot()
-print(time.time())
+print("Finish", time.time())
 # directory = "{}locality_check_with_potential_{}_{}/".format(PLOT_SAVE_DIR_BASE, 1.0 * i / 4, METHOD)
 # copy_code(directory)
 # ani.save("{}animation.gif".format(directory), writer='imagemagick', fps=10)
