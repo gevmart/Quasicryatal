@@ -11,11 +11,11 @@ def read_and_parse_input(filename):
     return lines
 
 
-lines = read_and_parse_input("{}square_single_phases_x_147_y_0_ssf_n=300_relaxed_10_low_timestep/data.txt".format(PLOT_SAVE_DIR_BASE))
+lines = read_and_parse_input("{}square_single_phases_x_147_y_0_ssf_n=300_relaxed_10_low_timestep/data.txt"
+                             .format(PLOT_SAVE_DIR_BASE))
 
 idx_list = [idx + 1 for idx, val in enumerate(lines) if len(val.split("[")) == 1]
-res = [lines[i:j] for i, j in zip([0] +
-          idx_list, idx_list + [None])]
+res = [lines[i:j] for i, j in zip([0] + idx_list, idx_list + [None])]
 for i in np.arange(len(res) - 1):
     res[i] = res[i][:-1]
 colors = ['red', 'blue', 'black']

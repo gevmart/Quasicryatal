@@ -1,12 +1,13 @@
 import numpy as np
 
-GRID_SIZE = 800
+METHOD = "ssf"
+GRID_SIZE = 500
 WAVELENGTH = 100
 V_0_REL = 3 * 4 * 10 ** 0  # Convenient to measure potential in recoil units
 M = 1
-WAVEPACKET_CENTER_X = 0
-WAVEPACKET_CENTER_Y = -0
-TIME_STEP_REL = 0.1
+WAVEPACKET_CENTER_X = 104
+WAVEPACKET_CENTER_Y = 104
+TIME_STEP_REL = 0.02
 NORM = 'ortho'
 PLOT_SAVE_DIR_BASE = "/Users/gevorg/workspace/PartIII/Project/Plots/"
 

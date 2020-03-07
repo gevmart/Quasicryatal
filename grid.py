@@ -1,7 +1,8 @@
 import numpy as np
 import math
+import os
 
-from config import GRID_SIZE, WAVELENGTH, v_0, omega, k, v_rec
+from config import *
 
 # %%
 x, y = np.meshgrid(
@@ -10,6 +11,12 @@ x, y = np.meshgrid(
 
 
 # %%
+POTENTIAL_CHANGE_SPEED = 275
+CUTOFF = 250
+started = False
+finished = False
+
+
 def generate_potential(t, v=float('nan')):
     """
     Generates the potential at time t
@@ -17,11 +24,9 @@ def generate_potential(t, v=float('nan')):
     :param v: optionally takes the strength of the potential, or uses the default from config
     :return: the potential grid at time t
     """
-    n = 1000000
-
     v = v_0 if math.isnan(v) else v * v_rec
 
-    p1, p2, p3, p4 = phase_single_square(t, n, start=0, cutoff=400)
+    p1, p2, p3, p4 = phase_single_square(t, POTENTIAL_CHANGE_SPEED, start=10, cutoff=CUTOFF)
 
     return -v / 4 * (
             np.cos(p1) ** 2 +
@@ -111,12 +116,19 @@ def square_movement(t, n, cutoff=10, start=0):
     :param start: time from which to start the square motion of the potential
     :return: final values of moving coordinates
     """
+    global started, finished
     x_t, y_t = x, y
     t = t - start / omega
     if t < 0:
         x_t = x
         y_t = y
     elif t * omega < cutoff:
+        if not started:
+            directory_to_save = "{}square_single_phases_x_{}_y_{}_{}_n={}_cutoff_{}_relaxed_10_low_timestep/".format(
+                PLOT_SAVE_DIR_BASE, WAVEPACKET_CENTER_X, WAVEPACKET_CENTER_Y, METHOD, POTENTIAL_CHANGE_SPEED, cutoff)
+            with open("{}data.txt".format(directory_to_save), 'a') as file:
+                file.write("Movement Started" + os.linesep)
+            started = True
         x_t = x + t * omega / n / k
         y_t = y
     elif t * omega < 2 * cutoff:
@@ -128,6 +140,12 @@ def square_movement(t, n, cutoff=10, start=0):
     elif t * omega < 4 * cutoff:
         x_t = x
         y_t = y + (4 * cutoff - t * omega) / n / k
+    elif not finished:
+            directory_to_save = "{}square_single_phases_x_{}_y_{}_{}_n={}_cutoff_{}_relaxed_10_low_timestep/".format(
+                PLOT_SAVE_DIR_BASE, WAVEPACKET_CENTER_X, WAVEPACKET_CENTER_Y, METHOD, POTENTIAL_CHANGE_SPEED, cutoff)
+            with open("{}data.txt".format(directory_to_save), 'a') as file:
+                file.write("Movement Ended" + os.linesep)
+            finished = True
 
     return x_t, y_t
 
