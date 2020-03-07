@@ -17,11 +17,11 @@ def generate_potential(t, v=float('nan')):
     :param v: optionally takes the strength of the potential, or uses the default from config
     :return: the potential grid at time t
     """
-    n = 10
+    n = 1000000
 
     v = v_0 if math.isnan(v) else v * v_rec
 
-    p1, p2, p3, p4 = phase_single_square(t, n)
+    p1, p2, p3, p4 = phase_single_square(t, n, start=0, cutoff=400)
 
     return -v / 4 * (
             np.cos(p1) ** 2 +
@@ -113,7 +113,10 @@ def square_movement(t, n, cutoff=10, start=0):
     """
     x_t, y_t = x, y
     t = t - start / omega
-    if t * omega < cutoff:
+    if t < 0:
+        x_t = x
+        y_t = y
+    elif t * omega < cutoff:
         x_t = x + t * omega / n / k
         y_t = y
     elif t * omega < 2 * cutoff:

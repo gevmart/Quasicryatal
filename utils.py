@@ -14,4 +14,9 @@ def copy_code(directory, create=False):
 
 
 def calc_center_of_mass(wavefunction):
-    return np.sum(np.abs(wavefunction) ** 2 * x), np.sum(np.abs(wavefunction) ** 2 * -y)
+    return np.sum(np.abs(wavefunction) ** 2 * x), np.sum(np.abs(wavefunction) ** 2 * y)
+
+
+def calc_root_mean_square(wavefunction):
+    x_c, y_c = calc_center_of_mass(wavefunction)
+    return np.sum(np.abs(wavefunction) ** 2 * ((x - x_c) ** 2 + (y - y_c) ** 2)) ** 0.5
