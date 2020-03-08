@@ -1,32 +1,28 @@
 import numpy as np
 import math
-import os
 
 from config import *
-
-# %%
-x, y = np.meshgrid(
-    np.linspace(-GRID_SIZE / 2, GRID_SIZE / 2, num=GRID_SIZE),
-    np.linspace(-GRID_SIZE / 2, GRID_SIZE / 2, num=GRID_SIZE))
+from utils import default_notify, x, y
 
 
 # %%
-POTENTIAL_CHANGE_SPEED = 275
-CUTOFF = 250
+POTENTIAL_CHANGE_SPEED = 8
+CUTOFF = 20
 started = False
 finished = False
 
 
-def generate_potential(t, v=float('nan')):
+def generate_potential(t, v=float('nan'), notify=default_notify):
     """
     Generates the potential at time t
     :param t: time
     :param v: optionally takes the strength of the potential, or uses the default from config
+    :param notify: a function to be called to notify of an event such as square movement started or finished
     :return: the potential grid at time t
     """
     v = v_0 if math.isnan(v) else v * v_rec
 
-    p1, p2, p3, p4 = phase_single_square(t, POTENTIAL_CHANGE_SPEED, start=10, cutoff=CUTOFF)
+    p1, p2, p3, p4 = phase_single_square(t, start=20, cutoff=CUTOFF, notify=notify)
 
     return -v / 4 * (
             np.cos(p1) ** 2 +
@@ -35,63 +31,77 @@ def generate_potential(t, v=float('nan')):
             np.cos(p4) ** 2)
 
 
-def propagate_sliding(t, n):
+def propagate_sliding(t):
     """
     Slides the potential to have a new center keeping the form of the potential
     :param t: time
     :param n: quantifies the rate of change of the potential
     :return: the phases of the lasers
     """
-    x_t, y_t = slide_x(t, n)
+    x_t, y_t = slide_x(t)
 
     return k * x_t, k * y_t, k / 2 ** 0.5 * (x_t + y_t), k / 2 ** 0.5 * (x_t - y_t)
 
 
-def slide_x(t, n):
+def slide_x(t):
     """
     Slides the potential along negative x direction
     :param t: time
     :param n: slide speed measure
     :return: new center position
     """
-    return x + t * omega / n / k, y
+    return x + t * omega / POTENTIAL_CHANGE_SPEED / k, y
 
 
-def propagate_square(t, n):
+def propagate_square(t):
     """
     Slides the potential in a square (left, up, right, down)
     :param t: time
     :param n: slide speed measure
     :return: new center position
     """
-    return square_movement(t, n)
+    return square_movement(t)
 
 
-def phase_single_laser(t, n):
+def phase_single_laser(t):
     """
     Changes the phase of the laser which is along x direction
     :param t: time
     :param n: potential change measure
     :return: phases of the lasers
     """
-    return k * (x + t * omega / n / k), k * y, k / 2 ** 0.5 * (x + y), k / 2 ** 0.5 * (x - y)
+    return k * (x + t * omega / POTENTIAL_CHANGE_SPEED / k), k * y, k / 2 ** 0.5 * (x + y), k / 2 ** 0.5 * (x - y)
 
 
-def phase_single_square(t, n, cutoff=30, start=0):
+def phase_single_square(t, cutoff=30, start=0, notify=default_notify):
     """
     Changes the phases of the lasers along x and y direction in a square fashion
     :param t: time
     :param n: potential change measure
     :param cutoff: optional size of the square
     :param start: start time of the square movement
+    :param notify: an optional method to be called when there is a need to notify
     :return: phases of the lasers
     """
-    p1_rel, p2_rel = square_movement(t, n, cutoff, start)
+    p1_rel, p2_rel = square_movement(t, cutoff, start, notify=notify)
 
     return k * p1_rel, k * p2_rel, k / 2 ** 0.5 * (x + y), k / 2 ** 0.5 * (x - y)
 
 
-def phase_square_and_reverse(t, n, cutoff=30):
+def phase_square_multiple(t, number_of_squares, start=0, cutoff=CUTOFF):
+    """
+    Changes the phases of the lasers along x and y directions in a square fashion number_of_squares times
+    :param t: time
+    :param number_of_squares: number of squares to be made in parameter space
+    :param start: start time of the square movement
+    :param cutoff: size of the square
+    :return: phases of the lasers
+    """
+    return phase_single_square(t, cutoff=CUTOFF, start=4 * CUTOFF * max(
+        0, min((omega * t - start) / 4 // CUTOFF, number_of_squares - 1)) + start)
+
+
+def phase_square_and_reverse(t, cutoff=30):
     """
     Changes the phases of the lasers along x and y directions in a square fashion, then unwinds the square back.
     It is expected that this action should results in no net movement
@@ -101,19 +111,20 @@ def phase_square_and_reverse(t, n, cutoff=30):
     :return: phases of the lasers
     """
     if t * omega < 4 * cutoff:
-        return phase_single_square(t, n, cutoff)
+        return phase_single_square(t, cutoff)
 
-    p1, p2, p3, p4 = phase_single_square(t, n, cutoff, 4 * cutoff)
+    p1, p2, p3, p4 = phase_single_square(t, cutoff, 4 * cutoff)
     return p2 - k * y + k * x, p1 - k * x + k * y, p3, p4
 
 
-def square_movement(t, n, cutoff=10, start=0):
+def square_movement(t, cutoff=10, start=0, notify=default_notify):
     """
     Makes a square movement in some coordinates
     :param t: time
     :param n: potential change measure
     :param cutoff: indicates thw size of the square
     :param start: time from which to start the square motion of the potential
+    :param notify: an optional method to be called when there is a need to notify
     :return: final values of moving coordinates
     """
     global started, finished
@@ -124,28 +135,22 @@ def square_movement(t, n, cutoff=10, start=0):
         y_t = y
     elif t * omega < cutoff:
         if not started:
-            directory_to_save = "{}square_single_phases_x_{}_y_{}_{}_n={}_cutoff_{}_relaxed_10_low_timestep/".format(
-                PLOT_SAVE_DIR_BASE, WAVEPACKET_CENTER_X, WAVEPACKET_CENTER_Y, METHOD, POTENTIAL_CHANGE_SPEED, cutoff)
-            with open("{}data.txt".format(directory_to_save), 'a') as file:
-                file.write("Movement Started" + os.linesep)
+            notify("Movement started")
             started = True
-        x_t = x + t * omega / n / k
+        x_t = x + t * omega / POTENTIAL_CHANGE_SPEED / k
         y_t = y
     elif t * omega < 2 * cutoff:
-        x_t = x + cutoff / n / k
-        y_t = y + (t * omega - cutoff) / n / k
+        x_t = x + cutoff / POTENTIAL_CHANGE_SPEED / k
+        y_t = y + (t * omega - cutoff) / POTENTIAL_CHANGE_SPEED / k
     elif t * omega < 3 * cutoff:
-        x_t = x + (3 * cutoff - t * omega) / n / k
-        y_t = y + cutoff / n / k
+        x_t = x + (3 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED / k
+        y_t = y + cutoff / POTENTIAL_CHANGE_SPEED / k
     elif t * omega < 4 * cutoff:
         x_t = x
-        y_t = y + (4 * cutoff - t * omega) / n / k
+        y_t = y + (4 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED / k
     elif not finished:
-            directory_to_save = "{}square_single_phases_x_{}_y_{}_{}_n={}_cutoff_{}_relaxed_10_low_timestep/".format(
-                PLOT_SAVE_DIR_BASE, WAVEPACKET_CENTER_X, WAVEPACKET_CENTER_Y, METHOD, POTENTIAL_CHANGE_SPEED, cutoff)
-            with open("{}data.txt".format(directory_to_save), 'a') as file:
-                file.write("Movement Ended" + os.linesep)
-            finished = True
+        notify("Movement ended")
+        finished = True
 
     return x_t, y_t
 

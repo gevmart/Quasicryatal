@@ -7,7 +7,7 @@ V_0_REL = 3 * 4 * 10 ** 0  # Convenient to measure potential in recoil units
 M = 1
 WAVEPACKET_CENTER_X = 104
 WAVEPACKET_CENTER_Y = 104
-TIME_STEP_REL = 0.02
+TIME_STEP_REL = 0.2
 NORM = 'ortho'
 PLOT_SAVE_DIR_BASE = "/Users/gevorg/workspace/PartIII/Project/Plots/"
 

@@ -5,11 +5,11 @@ from matplotlib import pyplot as plt, colors, animation
 
 import plotting
 from config import *
-from grid import x, y, generate_potential, POTENTIAL_CHANGE_SPEED, CUTOFF
+from grid import generate_potential, POTENTIAL_CHANGE_SPEED, CUTOFF
 from generate_wavepacket import wavepacket
 from time_propagation_ssf import propagate_ssf
 from time_propagation_cn import propagate_cn
-from utils import copy_code
+from utils import x, y, copy_code
 from testing_simulation import expansion_with_different_potential_strengths, expansion_without_potential
 
 # %%
@@ -60,12 +60,16 @@ def save_com_to_file(steps, v=float('nan')):
     n = 10
     t = 0
 
-    directory_to_save = "{}square_single_phases_x_{}_y_{}_{}_n={}_cutoff_{}_relaxed_10_low_timestep/".format(
+    directory_to_save = "{}to_be_deleted/".format(
         PLOT_SAVE_DIR_BASE, WAVEPACKET_CENTER_X, WAVEPACKET_CENTER_Y, METHOD, POTENTIAL_CHANGE_SPEED, CUTOFF)
     copy_code(directory_to_save)
 
+    def write_notification_to_file(message):
+        with open("{}data.txt".format(directory_to_save), 'a') as file:
+            file.write(message + os.linesep)
+
     for i in np.arange(steps):
-        wavef, com, rms = propagate(wavef, t, n, v)
+        wavef, com, rms = propagate(wavef, t, n, v, notify=write_notification_to_file)
         t += n * time_step
         avg = (avg * (i % 10) + com) / (i % 10 + 1)
         if i % 10 == 9:
@@ -75,8 +79,8 @@ def save_com_to_file(steps, v=float('nan')):
 
 
 print(time.time())
-# save_com_to_file(1200)
+save_com_to_file(1200)
 # calcualte_and_plot()
-expansion_with_different_potential_strengths(100, propagate, METHOD)
+# expansion_with_different_potential_strengths(100, propagate, METHOD)
 print(time.time())
 # ani.save("{}animation.gif".format(directory), writer='imagemagick', fps=10)
