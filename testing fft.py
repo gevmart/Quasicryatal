@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 from generate_wavepacket import wavepacket
 from plotting import heatmap
-from grid import x, y
+from potential import x, y
 from config import GRID_SIZE, k, WAVELENGTH, k_step
 
 NORM = 'ortho'
