@@ -1,7 +1,7 @@
 from scipy.linalg import inv, solve_banded
 
 from config import *
-from grid import generate_potential
+from potential import generate_potential
 from utils import calc_center_of_mass, calc_root_mean_square, default_notify
 
 

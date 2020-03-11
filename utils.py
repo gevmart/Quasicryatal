@@ -2,8 +2,7 @@ import os
 import numpy as np
 from shutil import copy
 
-from config import GRID_SIZE, PLOT_SAVE_DIR_BASE
-from config import PLOT_SAVE_DIR_BASE
+from config import GRID_SIZE
 
 
 # %%
@@ -15,9 +14,9 @@ x, y = np.meshgrid(
 def copy_code(directory, create=False):
     if not os.path.isdir(directory):
         os.mkdir(directory)
-    for file in os.listdir(PLOT_SAVE_DIR_BASE):
+    for file in os.listdir("./"):
         if file.endswith(".py"):
-            copy(PLOT_SAVE_DIR_BASE + file, directory)
+            copy("./" + file, directory)
 
 
 def calc_center_of_mass(wavefunction):
@@ -31,3 +30,16 @@ def calc_root_mean_square(wavefunction):
 
 def default_notify(message):
     print("Notified with a message {}".format(message))
+
+
+def apply(pair):
+    """
+    Applies the first element of tuple (a function) on the second one
+    :param pair: a tuple in a form (fn, item)
+    :return: fn(item)
+    """
+    return pair[0](pair[1])
+
+
+def identity(x):
+    return x

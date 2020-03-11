@@ -1,5 +1,5 @@
 from config import *
-from grid import generate_potential
+from potential import generate_potential
 from utils import x, y, calc_center_of_mass, calc_root_mean_square, default_notify
 
 
