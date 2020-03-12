@@ -2,14 +2,7 @@ import os
 import numpy as np
 from shutil import copy
 
-
 from config import GRID_SIZE
-
-
-# %%
-x, y = np.meshgrid(
-    np.linspace(-GRID_SIZE / 2, GRID_SIZE / 2, num=GRID_SIZE),
-    np.linspace(-GRID_SIZE / 2, GRID_SIZE / 2, num=GRID_SIZE))
 
 
 # %%
