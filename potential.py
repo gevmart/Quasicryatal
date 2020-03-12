@@ -6,9 +6,9 @@ from utils import default_notify, x, y, apply, identity
 
 
 # %%
-POTENTIAL_CHANGE_SPEED = 8
-CUTOFF = 10
-START = 5
+POTENTIAL_CHANGE_SPEED = 201
+CUTOFF = 400
+START = 40
 started = False
 finished = False
 
@@ -24,7 +24,7 @@ def generate_potential(t, v=float('nan'), notify=default_notify):
     v = v_0 if math.isnan(v) else v * v_rec
 
     t -= START / omega
-    p1, p2, p3, p4 = default_phases() if t < 0 else down_and_circle_xy(t, CUTOFF, notify)
+    p1, p2, p3, p4 = default_phases() if t < 0 else phase_single_square(t, CUTOFF, notify)
 
     return -v / 4 * (
             np.cos(p1) ** 2 +

@@ -11,7 +11,7 @@ def read_and_parse_input(filename):
     return lines
 
 
-lines = read_and_parse_input("{}square_single_phases_x_104_y_104_ssf_n=300_cutoff_400_grid_800_relaxed_10_low_timestep/data.txt"
+lines = read_and_parse_input("{}square_single_phases_x_104_y_104_ssf_n=200_cutoff_400_grid_1200_relaxed_10_low_timestep/data.txt"
                              .format(PLOT_SAVE_DIR_BASE))
 
 idx_list = [idx + 1 for idx, val in enumerate(lines) if len(val.split("[")) == 1]

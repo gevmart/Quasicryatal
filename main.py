@@ -9,7 +9,7 @@ from potential import generate_potential, POTENTIAL_CHANGE_SPEED, CUTOFF
 from generate_wavepacket import wavepacket
 from time_propagation_ssf import propagate_ssf
 from time_propagation_cn import propagate_cn
-from utils import x, y, copy_code
+from utils import *
 from testing_simulation import expansion_with_different_potential_strengths, expansion_without_potential
 
 # %%
@@ -41,6 +41,9 @@ def calcualte_and_plot(v=float('nan')):
         im_wave.set_data(probability_density)
         im_wave.set_clim(np.max(probability_density), np.min(probability_density))
         print(com, rms)
+        print(probability_at_edges(wavefunction, 50), "left", probability_left_edge(wavefunction), "right",
+              probability_right_edge(wavefunction), "up", probability_upper_edge(wavefunction), "down",
+              probability_lower_edge(wavefunction))
         return im_wave
 
     ani = animation.FuncAnimation(fig, animate, frames=200, repeat=True, interval=100)
@@ -75,13 +78,16 @@ def save_com_to_file(steps, v=float('nan')):
         avg = (avg * (i % 10) + com) / (i % 10 + 1)
         if i % 10 == 9:
             with open("{}data.txt".format(directory_to_save), 'a') as file:
-                file.write(str(avg) + "   " + str(rms) + "   " + str(t) + "  " + str(time.time()) + os.linesep)
+                file.write(str(avg) + "   " + str(rms) + "   " + str(t) + "  " + str(time.time()) + "   " +
+                           probability_at_edges(wavefunction) + "   " + probability_left_edge(wavefunction) + "   " +
+                           probability_right_edge(wavefunction) + "   " + probability_upper_edge(wavefunction) + "   "
+                           + probability_lower_edge(wavefunction) + os.linesep)
             avg = np.array([0.0, 0.0])
 
 
 print(time.time())
-# save_com_to_file(1200)
-calcualte_and_plot()
+save_com_to_file(2000)
+# calcualte_and_plot()
 # expansion_with_different_potential_strengths(100, propagate, METHOD)
 print(time.time())
 # ani.save("{}animation.gif".format(directory), writer='imagemagick', fps=10)
