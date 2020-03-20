@@ -2,7 +2,7 @@ import os
 import numpy as np
 from shutil import copy
 
-from config import GRID_SIZE, WAVELENGTH
+from config import GRID_SIZE, WAVELENGTH, CODE_PATH
 
 
 # %%
@@ -14,9 +14,9 @@ x, y = np.meshgrid(
 def copy_code(directory, create=False):
     if not os.path.isdir(directory):
         os.mkdir(directory)
-    for file in os.listdir("/home/ubuntu/environment/quasicrystal/"):
+    for file in os.listdir(CODE_PATH):
         if file.endswith(".py"):
-            copy("/home/ubuntu/environment/quasicrystal/" + file, directory)
+            copy(CODE_PATH + file, directory)
 
 
 def calc_center_of_mass(wavefunction):
@@ -45,7 +45,7 @@ def identity(x):
     return x
 
 
-def probability_at_edges(wavefunction, edge_length=WAVELENGTH / 2):
+def probability_at_edges(wavefunction, edge_length=WAVELENGTH // 2):
     """
     Computes the probability of the wavefunction being in the edge of the box of thickness edge_length
     :param wavefunction: the wavefunction
@@ -56,7 +56,7 @@ def probability_at_edges(wavefunction, edge_length=WAVELENGTH / 2):
            np.sum(np.abs(wavefunction[edge_length:-edge_length, edge_length:-edge_length]) ** 2)
 
 
-def probability_left_edge(wavefunction, edge_length=WAVELENGTH / 2):
+def probability_left_edge(wavefunction, edge_length=WAVELENGTH // 2):
     """
     Computes the probability of the wavefunction being in the left edge of the box of thickness edge_length
     :param wavefunction: the wavefunction
@@ -67,7 +67,7 @@ def probability_left_edge(wavefunction, edge_length=WAVELENGTH / 2):
            np.sum(np.abs(wavefunction[edge_length:, :]) ** 2)
 
 
-def probability_right_edge(wavefunction, edge_length=WAVELENGTH / 2):
+def probability_right_edge(wavefunction, edge_length=WAVELENGTH // 2):
     """
     Computes the probability of the wavefunction being in the right edge of the box of thickness edge_length
     :param wavefunction: the wavefunction
@@ -78,7 +78,7 @@ def probability_right_edge(wavefunction, edge_length=WAVELENGTH / 2):
            np.sum(np.abs(wavefunction[:-edge_length, :]) ** 2)
 
 
-def probability_upper_edge(wavefunction, edge_length=WAVELENGTH / 2):
+def probability_upper_edge(wavefunction, edge_length=WAVELENGTH // 2):
     """
     Computes the probability of the wavefunction being in the upper edge of the box of thickness edge_length
     :param wavefunction: the wavefunction
@@ -89,7 +89,7 @@ def probability_upper_edge(wavefunction, edge_length=WAVELENGTH / 2):
            np.sum(np.abs(wavefunction[:, edge_length:]) ** 2)
 
 
-def probability_lower_edge(wavefunction, edge_length=WAVELENGTH / 2):
+def probability_lower_edge(wavefunction, edge_length=WAVELENGTH // 2):
     """
     Computes the probability of the wavefunction being in the lower edge of the box of thickness edge_length
     :param wavefunction: the wavefunction

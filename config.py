@@ -1,15 +1,22 @@
 import numpy as np
+from consts import *
 
 METHOD = "ssf"
 GRID_SIZE = 500
-WAVELENGTH = 50
+WAVELENGTH = 100
+POTENTIAL_CHANGE_SPEED = 5
+CUTOFF = 4
+START = 3
+PATH = MOVE_SQUARE
+REPEATS = 2
 V_0_REL = 3 * 4 * 10 ** 0  # Convenient to measure potential in recoil units
 M = 1
-WAVEPACKET_CENTER_X = 104
-WAVEPACKET_CENTER_Y = 104
+WAVEPACKET_CENTER_X = 62
+WAVEPACKET_CENTER_Y = 62
 TIME_STEP_REL = 0.1
 NORM = 'ortho'
-PLOT_SAVE_DIR_BASE = "/home/ubuntu/environment/quasicrystal/"
+PLOT_SAVE_DIR_BASE = "/Users/gevorg/workspace/PartIII/Project/Plots/"
+CODE_PATH = "/Users/gevorg/PycharmProjects/Quasicrystal/"
 
 k = 2 * np.pi / WAVELENGTH
 v_rec = k ** 2 / (2 * M)  # working in units of h_bar = 1

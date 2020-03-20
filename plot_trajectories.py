@@ -11,7 +11,7 @@ def read_and_parse_input(filename):
     return lines
 
 
-lines = read_and_parse_input("{}square_single_phases_x_104_y_104_ssf_n=200_cutoff_400_grid_1200_relaxed_10_low_timestep/data.txt"
+lines = read_and_parse_input("{}square_single_phases_x_62_y_62_cn_n_301_cutoff_600_wavelength_60_grid_800_timestep_0.1_multilple_4/data.txt"
                              .format(PLOT_SAVE_DIR_BASE))
 
 idx_list = [idx + 1 for idx, val in enumerate(lines) if len(val.split("[")) == 1]
@@ -20,8 +20,10 @@ for i in np.arange(len(res) - 1):
     res[i] = res[i][:-1]
 colors = ['red', 'blue', 'black']
 for i in np.arange(len(res)):
-    movement = np.array([list(map(float, list(filter(None, li.split("[")[1].split("]")[0].split(" "))))) for li in res[i]])
-    plt.quiver(movement[:-1, 0], movement[:-1, 1], movement[1:, 0] - movement[:-1, 0], movement[1:, 1] - movement[:-1, 1],
+    movement = np.array([list(map(float, list(filter(None, li.split("[")[1].split("]")[0]
+                                                     .split(" "))))) for li in res[i]])
+    plt.quiver(movement[:-1, 0], movement[:-1, 1], movement[1:, 0] - movement[:-1, 0],
+               movement[1:, 1] - movement[:-1, 1],
                scale_units='xy', angles='xy', scale=1, color=colors[i])
 
 plt.show()

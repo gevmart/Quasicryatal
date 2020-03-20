@@ -2,13 +2,11 @@ import numpy as np
 import math
 
 from config import *
+from consts import *
 from utils import default_notify, x, y, apply, identity
 
 
 # %%
-POTENTIAL_CHANGE_SPEED = 201
-CUTOFF = 400
-START = 40
 started = False
 finished = False
 
@@ -24,7 +22,7 @@ def generate_potential(t, v=float('nan'), notify=default_notify):
     v = v_0 if math.isnan(v) else v * v_rec
 
     t -= START / omega
-    p1, p2, p3, p4 = default_phases() if t < 0 else phase_single_square(t, CUTOFF, notify)
+    p1, p2, p3, p4 = default_phases() if t < 0 else make_modulation(t, notify)
 
     return -v / 4 * (
             np.cos(p1) ** 2 +
@@ -33,13 +31,27 @@ def generate_potential(t, v=float('nan'), notify=default_notify):
             np.cos(p4) ** 2)
 
 
-def propagate_sliding(t):
+def make_modulation(t, notify):
+    """
+    Makes a general modulation motion
+    :param t: time
+    :param notify: notify function
+    :return: phases of the lasers
+    """
+    fn, duration = path_map[PATH]
+    return fn(t - duration * CUTOFF * max(0, min(
+        (omega * t) / duration // CUTOFF, REPEATS - 1)) / omega, cutoff=CUTOFF, notify=notify)
+
+
+def propagate_sliding(t, cutoff=CUTOFF, notify=default_notify):
     """
     Slides the potential to have a new center keeping the form of the potential
     :param t: time
+    :param cutoff: the size
+    :param notify: function for notifying
     :return: the phases of the lasers
     """
-    x_t, y_t = propagate_square(t)
+    x_t, y_t = propagate_square(t, cutoff=cutoff, notify=notify)
 
     return k * x_t, k * y_t, k / 2 ** 0.5 * (x_t + y_t), k / 2 ** 0.5 * (x_t - y_t)
 
@@ -53,13 +65,15 @@ def slide_x(t):
     return x + t * omega / POTENTIAL_CHANGE_SPEED / k, y
 
 
-def propagate_square(t):
+def propagate_square(t, cutoff=CUTOFF, notify=default_notify):
     """
     Slides the potential in a square (left, up, right, down)
     :param t: time
+    :param cutoff: the size of the square
+    :param notify: notify function
     :return: new center position
     """
-    p1, p2, p3, p4 = square_movement(t)
+    p1, p2, p3, p4 = square_movement(t, cutoff=cutoff, notify=notify)
     return p1 / k, p2 / k
 
 
@@ -84,36 +98,19 @@ def phase_single_square(t, cutoff=30, notify=default_notify, notify_bool=True):
     return square_movement(t, cutoff, notify=notify, notify_bool=notify_bool)
 
 
-def phase_square_multiple(t, number_of_squares, cutoff=CUTOFF, notify=default_notify):
-    """
-    Changes the phases of the lasers along x and y directions in a square fashion number_of_squares times
-    :param t: time
-    :param number_of_squares: number of squares to be made in parameter space
-    :param cutoff: size of the square
-    :param notify: notifies of start and end of modulation
-    :return: phases of the lasers
-    """
-    if t > 0:
-        notify_started(t, notify)
-    if t > number_of_squares * 4 * cutoff/ omega:
-        notify_finished(t, notify)
-    return phase_single_square(t - 4 * cutoff * max(0, min(
-        (omega * t) / 4 // cutoff, number_of_squares - 1)) / omega, cutoff=cutoff, notify=notify, notify_bool=False)
-
-
-def phase_square_and_reverse(t, cutoff=30):
+def phase_square_and_reverse(t, cutoff=30, notify=default_notify):
     """
     Changes the phases of the lasers along x and y directions in a square fashion, then unwinds the square back.
     It is expected that this action should results in no net movement
     :param t: time
-    :param n: potential change measure
     :param cutoff: optional size of the square
+    :param notify: notify function
     :return: phases of the lasers
     """
     if t * omega < 4 * cutoff:
         return phase_single_square(t, cutoff)
 
-    p1, p2, p3, p4 = phase_single_square(t - 4 * cutoff / omega, cutoff)
+    p1, p2, p3, p4 = phase_single_square(t - 4 * cutoff / omega, cutoff, notify=notify)
     return p2 - k * y + k * x, p1 - k * x + k * y, p3, p4
 
 
@@ -260,7 +257,7 @@ def circle(t, radius, center_x=0, center_y=0, cutoff=30):
            p2 + (center_y - np.cos(t * omega / cutoff)) * radius, p3, p4
 
 
-def square_movement(t, cutoff=10, notify=default_notify, notify_bool=True):
+def square_movement(t, cutoff=CUTOFF, notify=default_notify, notify_bool=True):
     """
     Makes a square movement in some coordinates
     :param t: time
@@ -324,14 +321,14 @@ def default_phases():
 def notify_started(t, notify):
     global started
     if t > 0 and not started:
-        notify("Modulation started")
+        notify(START_MESSAGE)
         started = True
 
 
 def notify_finished(t, notify):
     global finished
     if not finished:
-        notify("Modulation finished")
+        notify(FINISH_MESSAGE)
         finished = True
 
 
@@ -344,6 +341,18 @@ def potential_ten_fold(t, v=float('nan')):
     kxs, kys = k * np.cos(angles), k * np.sin(angles)
 
     return -v / lasers_number * np.sum(np.cos(np.outer(x, kxs) + np.outer(y, kys)) ** 2, axis=1).reshape((GRID_SIZE, GRID_SIZE))
+
+
+# a map from path keyword to the function and duration of the cutoff
+path_map = {
+    MOVE_SQUARE: (propagate_sliding, 4),
+    SQUARE: (phase_single_square, 4),
+    TRIANGLE: (triangle_xy, 3),
+    PARALLELOGRAM: (parallelogram_xy, 4),
+    SEMICIRCLE: (semicircle_xy, 2 + np.pi),
+    CIRCLE: (circle_xy, 2 * np.pi),
+    DOWN_CIRCLE: (down_and_circle_xy, 2 + 2 * np.pi)
+}
 
 
 # %%

@@ -63,8 +63,8 @@ def save_com_to_file(steps, v=float('nan')):
     n = 10
     t = 0
 
-    directory_to_save = "{}square_single_phases_x_{}_y_{}_{}_n_{}_cutoff_{}_grid_{}_timestep_{}/".format(
-        PLOT_SAVE_DIR_BASE, WAVEPACKET_CENTER_X, WAVEPACKET_CENTER_Y, METHOD,
+    directory_to_save = "{}{}_x_{}_y_{}_{}_n_{}_cutoff_{}_grid_{}_timestep_{}/".format(
+        PLOT_SAVE_DIR_BASE, PATH, WAVEPACKET_CENTER_X, WAVEPACKET_CENTER_Y, METHOD,
         POTENTIAL_CHANGE_SPEED, CUTOFF, GRID_SIZE, TIME_STEP_REL)
     copy_code(directory_to_save)
 
@@ -79,15 +79,15 @@ def save_com_to_file(steps, v=float('nan')):
         if i % 10 == 9:
             with open("{}data.txt".format(directory_to_save), 'a') as file:
                 file.write(str(avg) + "   " + str(rms) + "   " + str(t) + "  " + str(time.time()) + "   " +
-                           probability_at_edges(wavefunction) + "   " + probability_left_edge(wavefunction) + "   " +
-                           probability_right_edge(wavefunction) + "   " + probability_upper_edge(wavefunction) + "   "
-                           + probability_lower_edge(wavefunction) + os.linesep)
+                           str(probability_at_edges(wavef)) + "   " + str(probability_left_edge(wavef)) + "   " +
+                           str(probability_right_edge(wavef)) + "   " + str(probability_upper_edge(wavef)) + "   "
+                           + str(probability_lower_edge(wavef)) + os.linesep)
             avg = np.array([0.0, 0.0])
 
 
 print(time.time())
-save_com_to_file(2000)
-# calcualte_and_plot()
+# save_com_to_file(2000)
+calcualte_and_plot()
 # expansion_with_different_potential_strengths(100, propagate, METHOD)
 print(time.time())
 # ani.save("{}animation.gif".format(directory), writer='imagemagick', fps=10)
