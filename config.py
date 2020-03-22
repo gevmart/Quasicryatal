@@ -9,6 +9,7 @@ CUTOFF = 4
 START = 3
 PATH = MOVE_SQUARE
 REPEATS = 2
+NUMBER_OF_LASERS = 5
 V_0_REL = 3 * 4 * 10 ** 0  # Convenient to measure potential in recoil units
 M = 1
 WAVEPACKET_CENTER_X = 62

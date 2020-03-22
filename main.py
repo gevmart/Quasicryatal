@@ -63,9 +63,9 @@ def save_com_to_file(steps, v=float('nan')):
     n = 10
     t = 0
 
-    directory_to_save = "{}{}_x_{}_y_{}_{}_n_{}_cutoff_{}_grid_{}_timestep_{}/".format(
+    directory_to_save = "{}{}_x_{}_y_{}_{}_n_{}_cutoff_{}_grid_{}_wavelength__timestep_{}_lasernum_{}_repeat_{}/".format(
         PLOT_SAVE_DIR_BASE, PATH, WAVEPACKET_CENTER_X, WAVEPACKET_CENTER_Y, METHOD,
-        POTENTIAL_CHANGE_SPEED, CUTOFF, GRID_SIZE, TIME_STEP_REL)
+        POTENTIAL_CHANGE_SPEED, CUTOFF, GRID_SIZE, WAVELENGTH, TIME_STEP_REL, NUMBER_OF_LASERS, REPEATS)
     copy_code(directory_to_save)
 
     def write_notification_to_file(message):
