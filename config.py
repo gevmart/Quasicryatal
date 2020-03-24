@@ -1,15 +1,16 @@
 import numpy as np
 from consts import *
 
-METHOD = "ssf"
+METHOD = "cn"
 GRID_SIZE = 500
 WAVELENGTH = 100
 POTENTIAL_CHANGE_SPEED = 5
 CUTOFF = 4
 START = 3
-PATH = MOVE_SQUARE
+PATH = FOUR_CUBOID
 REPEATS = 2
-NUMBER_OF_LASERS = 5
+NUMBER_OF_LASERS = 4
+LASERS = (0, 2, 1, 3)
 V_0_REL = 3 * 4 * 10 ** 0  # Convenient to measure potential in recoil units
 M = 1
 WAVEPACKET_CENTER_X = 62

@@ -36,7 +36,7 @@ def make_modulation(t, notify):
     """
     fn, duration = path_map[PATH]
     return fn(t - duration * CUTOFF * max(0, min(
-        (omega * t) / duration // CUTOFF, REPEATS - 1)) / omega, cutoff=CUTOFF, notify=notify)
+        (omega * t) / duration // CUTOFF, REPEATS - 1)) / omega, cutoff=CUTOFF, notify=notify, lasers=LASERS)
 
 
 def propagate_sliding(t, cutoff=CUTOFF, notify=default_notify):
@@ -84,40 +84,38 @@ def phase_single_laser(t):
     return k * (x + t * omega / POTENTIAL_CHANGE_SPEED / k), k * y, k / 2 ** 0.5 * (x + y), k / 2 ** 0.5 * (x - y)
 
 
-def phase_single_square(t, cutoff=30, notify=default_notify, notify_bool=True, laser_one=0, laser_two=2):
+def phase_single_square(t, cutoff=30, notify=default_notify, notify_bool=True, lasers=(0, 2)):
     """
     Changes the phases of the lasers along x and y direction in a square fashion
     :param t: time
     :param cutoff: optional size of the square
     :param notify: an optional method to be called when there is a need to notify
     :param notify_bool: whether to notify
-    :param laser_one: number of the first laser in the plane of movement in parameter space
-    :param laser_two: number of the second in the plane of movement in parameter space
+    :param lasers: numbers of the lasers to define the plane of movement in parameter space
     :return: phases of the lasers
     """
-    return square_movement(t, cutoff, notify=notify, notify_bool=notify_bool, laser_one=laser_one, laser_two=laser_two)
+    return square_movement(t, cutoff, notify=notify, notify_bool=notify_bool, laser_one=lasers)
 
 
-def phase_square_and_reverse(t, cutoff=30, notify=default_notify, laser_one=0, laser_two=2):
+def phase_square_and_reverse(t, cutoff=30, notify=default_notify, lasers=(0, 2)):
     """
     Changes the phases of the lasers along x and y directions in a square fashion, then unwinds the square back.
     It is expected that this action should results in no net movement
     :param t: time
     :param cutoff: optional size of the square
     :param notify: notify function
-    :param laser_one: number of the first laser in the plane of movement in parameter space
-    :param laser_two: number of the second in the plane of movement in parameter space
+    :param lasers: numbers of the lasers to define the plane of movement in parameter space
     :return: phases of the lasers
     """
     if t * omega < 4 * cutoff:
         return phase_single_square(t, cutoff)
 
     p1, p2, p3, p4 = phase_single_square(t - 4 * cutoff / omega, cutoff, notify=notify,
-                                         laser_one=laser_one, laser_two=laser_two)
+                                         lasers=lasers)
     return p2 - k * y + k * x, p1 - k * x + k * y, p3, p4
 
 
-def triangle(t, cutoff=30, notify=default_notify, laser_one=0, laser_two=2):
+def triangle(t, cutoff=30, notify=default_notify, lasers=(0, 2)):
     """
     Changes the phases of x and y directed lasers in an equilateral triangle
        #########
@@ -128,22 +126,21 @@ def triangle(t, cutoff=30, notify=default_notify, laser_one=0, laser_two=2):
     :param t: time
     :param cutoff: size of the triangle
     :param notify: a function to notify when the cycle starts and ends
-    :param laser_one: number of the first laser in the plane of movement in parameter space
-    :param laser_two: number of the second in the plane of movement in parameter space
+    :param lasers: numbers of the lasers to define the plane of movement in parameter space
     :return: phases of the lasers
     """
     triangle_list_fns = np.repeat(identity, NUMBER_OF_LASERS * 3).reshape(3, NUMBER_OF_LASERS)
-    triangle_list_fns[0, laser_one] = lambda x: x - t * omega / POTENTIAL_CHANGE_SPEED / 2
-    triangle_list_fns[0, laser_two] = lambda x: x + t * omega / POTENTIAL_CHANGE_SPEED * 3 ** 0.5 / 2
-    triangle_list_fns[1, laser_one] = lambda x: x + (2 * t * omega - 3 * cutoff) / POTENTIAL_CHANGE_SPEED / 2
-    triangle_list_fns[1, laser_two] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED * 3 ** 0.5 / 2
-    triangle_list_fns[2, laser_one] = lambda x: x - (t * omega - 3 * cutoff) / POTENTIAL_CHANGE_SPEED / 2
-    triangle_list_fns[2, laser_two] = lambda x: x - (t * omega - 3 * cutoff) / POTENTIAL_CHANGE_SPEED * 3 ** 0.5 / 2
+    triangle_list_fns[0, lasers[0]] = lambda x: x - t * omega / POTENTIAL_CHANGE_SPEED / 2
+    triangle_list_fns[0, lasers[1]] = lambda x: x + t * omega / POTENTIAL_CHANGE_SPEED * 3 ** 0.5 / 2
+    triangle_list_fns[1, lasers[0]] = lambda x: x + (2 * t * omega - 3 * cutoff) / POTENTIAL_CHANGE_SPEED / 2
+    triangle_list_fns[1, lasers[1]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED * 3 ** 0.5 / 2
+    triangle_list_fns[2, lasers[0]] = lambda x: x - (t * omega - 3 * cutoff) / POTENTIAL_CHANGE_SPEED / 2
+    triangle_list_fns[2, lasers[1]] = lambda x: x - (t * omega - 3 * cutoff) / POTENTIAL_CHANGE_SPEED * 3 ** 0.5 / 2
 
     return closed_loop_steps(t, len(triangle_list_fns), triangle_list_fns, cutoff, notify)
 
 
-def parallelogram(t, cutoff=30, notify=default_notify, laser_one=0, laser_two=2):
+def parallelogram(t, cutoff=30, notify=default_notify, lasers=(0, 2)):
     """
     Changes the phases of x and y directed lasers in a counterclockwise parallelogram with pi/3 angle
        ----#---
@@ -158,24 +155,23 @@ def parallelogram(t, cutoff=30, notify=default_notify, laser_one=0, laser_two=2)
     :param t: time
     :param cutoff: size of the triangle
     :param notify: a function to notify when the cycle starts and ends
-    :param laser_one: number of the first laser in the plane of movement in parameter space
-    :param laser_two: number of the second in the plane of movement in parameter space
+    :param lasers: numbers of the lasers to define the plane of movement in parameter space
     :return: phases of the lasers
     """
     parallelogram_fns_list = np.repeat(identity, NUMBER_OF_LASERS * 4).reshape(4, NUMBER_OF_LASERS)
-    parallelogram_fns_list[0, laser_one] = lambda x: x - t * omega / POTENTIAL_CHANGE_SPEED / 2
-    parallelogram_fns_list[0, laser_two] = lambda x: x + t * omega / POTENTIAL_CHANGE_SPEED * 3 ** 0.5 / 2
-    parallelogram_fns_list[1, laser_one] = lambda x: x + (t * omega - 2 * cutoff) / POTENTIAL_CHANGE_SPEED / 2
-    parallelogram_fns_list[1, laser_two] = lambda x: x + t * omega / POTENTIAL_CHANGE_SPEED * 3 ** 0.5 / 2
-    parallelogram_fns_list[2, laser_one] = lambda x: x + (t * omega - 2 * cutoff) / POTENTIAL_CHANGE_SPEED / 2
-    parallelogram_fns_list[2, laser_two] = lambda x: x + (4 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED * 3 ** 0.5 / 2
-    parallelogram_fns_list[3, laser_one] = lambda x: x + (4 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED / 2
-    parallelogram_fns_list[3, laser_two] = lambda x: x + (4 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED * 3 ** 0.5 / 2
+    parallelogram_fns_list[0, lasers[0]] = lambda x: x - t * omega / POTENTIAL_CHANGE_SPEED / 2
+    parallelogram_fns_list[0, lasers[1]] = lambda x: x + t * omega / POTENTIAL_CHANGE_SPEED * 3 ** 0.5 / 2
+    parallelogram_fns_list[1, lasers[0]] = lambda x: x + (t * omega - 2 * cutoff) / POTENTIAL_CHANGE_SPEED / 2
+    parallelogram_fns_list[1, lasers[1]] = lambda x: x + t * omega / POTENTIAL_CHANGE_SPEED * 3 ** 0.5 / 2
+    parallelogram_fns_list[2, lasers[0]] = lambda x: x + (t * omega - 2 * cutoff) / POTENTIAL_CHANGE_SPEED / 2
+    parallelogram_fns_list[2, lasers[1]] = lambda x: x + (4 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED * 3 ** 0.5 / 2
+    parallelogram_fns_list[3, lasers[0]] = lambda x: x + (4 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED / 2
+    parallelogram_fns_list[3, lasers[1]] = lambda x: x + (4 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED * 3 ** 0.5 / 2
 
     return closed_loop_steps(t, len(parallelogram_fns_list), parallelogram_fns_list, cutoff, notify)
 
 
-def semicircle(t, cutoff=30, notify=default_notify, laser_one=0, laser_two=2):
+def semicircle(t, cutoff=30, notify=default_notify, lasers=(0, 2)):
     """
     Changes the phases of x and y directed lasers in a counterclockwise semicircle
        --#####-
@@ -185,21 +181,20 @@ def semicircle(t, cutoff=30, notify=default_notify, laser_one=0, laser_two=2):
     :param t: time
     :param cutoff: size of the semicircle
     :param notify: a function to notify when the cycle starts and ends
-    :param laser_one: number of the first laser in the plane of movement in parameter space
-    :param laser_two: number of the second in the plane of movement in parameter space
+    :param lasers: numbers of the lasers to define the plane of movement in parameter space
     :return: phases of the lasers
     """
     radius = cutoff / POTENTIAL_CHANGE_SPEED
     semicircle_list_fns = np.repeat(identity, NUMBER_OF_LASERS * 3).reshape(3, NUMBER_OF_LASERS)
-    semicircle_list_fns[0, laser_one] = lambda x: x - t * omega / POTENTIAL_CHANGE_SPEED
-    semicircle_list_fns[1, laser_one] = lambda x: x - radius * np.cos((t * omega - cutoff) / cutoff)
-    semicircle_list_fns[1, laser_two] = lambda x: x + radius * np.sin((t * omega - cutoff) / cutoff)
-    semicircle_list_fns[2, laser_one] = lambda x: x - (t * omega - (2 + np.pi) * cutoff) / POTENTIAL_CHANGE_SPEED
+    semicircle_list_fns[0, lasers[0]] = lambda x: x - t * omega / POTENTIAL_CHANGE_SPEED
+    semicircle_list_fns[1, lasers[0]] = lambda x: x - radius * np.cos((t * omega - cutoff) / cutoff)
+    semicircle_list_fns[1, lasers[1]] = lambda x: x + radius * np.sin((t * omega - cutoff) / cutoff)
+    semicircle_list_fns[2, lasers[0]] = lambda x: x - (t * omega - (2 + np.pi) * cutoff) / POTENTIAL_CHANGE_SPEED
 
     return closed_loop_steps(t, len(semicircle_list_fns), semicircle_list_fns, cutoff, notify, intervals=[1, np.pi, 1])
 
 
-def circle(t, cutoff=30, notify=default_notify, laser_one=0, laser_two=2):
+def circle(t, cutoff=30, notify=default_notify, lasers=(0, 2)):
     """
     Changes the phases of x and y directed lasers in a counterclockwise circle starting, but not centered at the origin
        --#####-
@@ -212,14 +207,13 @@ def circle(t, cutoff=30, notify=default_notify, laser_one=0, laser_two=2):
     :param t: time
     :param cutoff: size of the circle
     :param notify: a function to notify when the cycle starts and ends
-    :param laser_one: number of the first laser in the plane of movement in parameter space
-    :param laser_two: number of the second in the plane of movement in parameter space
+    :param lasers: numbers of the lasers to define the plane of movement in parameter space
     :return: phases of the lasers
     """
     notify_started(t, notify)
     radius = cutoff / POTENTIAL_CHANGE_SPEED
     if 0 < t * omega < 2 * np.pi * cutoff:
-        return circle_movement(t, radius, laser_one=laser_one, laser_two=laser_two,
+        return circle_movement(t, radius, lasers=lasers,
                                center_one=0, center_two=1, cutoff=cutoff)
 
     notify_finished(t, notify)
@@ -227,7 +221,7 @@ def circle(t, cutoff=30, notify=default_notify, laser_one=0, laser_two=2):
     return default_phases()
 
 
-def down_and_circle(t, cutoff=30, notify=default_notify, laser_one=0, laser_two=2):
+def down_and_circle(t, cutoff=CUTOFF, notify=default_notify, lasers=(0, 2)):
     """
     Changes the phases of x and y directed lasers in a counterclockwise circle centered at origin by
      first going down, then making the circle
@@ -241,40 +235,98 @@ def down_and_circle(t, cutoff=30, notify=default_notify, laser_one=0, laser_two=
     :param t: time
     :param cutoff: size of the circle
     :param notify: a function to notify when the cycle starts and ends
-    :param laser_one: number of the first laser in the plane of movement in parameter space
-    :param laser_two: number of the second in the plane of movement in parameter space
+    :param lasers: numbers of the lasers to define the plane of movement in parameter space
     :return: phases of the lasers
     """
     radius = cutoff / POTENTIAL_CHANGE_SPEED
     down_circle_fns_list = np.repeat(identity, NUMBER_OF_LASERS * 3).reshape(3, NUMBER_OF_LASERS)
-    down_circle_fns_list[0, laser_two] = lambda x: x - omega * t / POTENTIAL_CHANGE_SPEED
-    down_circle_fns_list[1, laser_one] = lambda x: x + radius * (-np.sin((t * omega - cutoff) / cutoff))
-    down_circle_fns_list[1, laser_two] = lambda x: x + radius * (-np.cos((t * omega - cutoff) / cutoff))
-    down_circle_fns_list[2, laser_two] = lambda x: x + (omega * t - (2 + 2 * np.pi) * cutoff) / POTENTIAL_CHANGE_SPEED
+    down_circle_fns_list[0, lasers[1]] = lambda x: x - omega * t / POTENTIAL_CHANGE_SPEED
+    down_circle_fns_list[1, lasers[0]] = lambda x: x + radius * (-np.sin((t * omega - cutoff) / cutoff))
+    down_circle_fns_list[1, lasers[1]] = lambda x: x + radius * (-np.cos((t * omega - cutoff) / cutoff))
+    down_circle_fns_list[2, lasers[1]] = lambda x: x + (omega * t - (2 + 2 * np.pi) * cutoff) / POTENTIAL_CHANGE_SPEED
 
     return closed_loop_steps(t, len(down_circle_fns_list), down_circle_fns_list, cutoff, notify,
                              intervals=[1, 2 * np.pi, 1])
 
 
-def circle_movement(t, radius, laser_one=0, laser_two=2, center_one=0, center_two=0, cutoff=CUTOFF):
+def cuboid(t, cutoff=CUTOFF, notify=default_notify, lasers=(0, 2, 1)):
+    """
+    Makes a modulation of the potential by changing the phases of three lasers in a cuboid fashion
+    :param t: time
+    :param cutoff: size of the cuboid
+    :param notify: notify function
+    :param lasers: numbers of the lasers to define the plane of movement in parameter space
+    :return:
+    """
+    cuboid_fns_list = np.repeat(identity, NUMBER_OF_LASERS * 6).reshape(6, NUMBER_OF_LASERS)
+    cuboid_fns_list[0, lasers[0]] = lambda x: x + t * omega / POTENTIAL_CHANGE_SPEED
+    cuboid_fns_list[1, lasers[0]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
+    cuboid_fns_list[1, lasers[1]] = lambda x: x + (t * omega - cutoff) / POTENTIAL_CHANGE_SPEED
+    cuboid_fns_list[2, lasers[0]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
+    cuboid_fns_list[2, lasers[1]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
+    cuboid_fns_list[2, lasers[2]] = lambda x: x + (t * omega - 2 * cutoff) / POTENTIAL_CHANGE_SPEED
+    cuboid_fns_list[3, lasers[0]] = lambda x: x + (4 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED
+    cuboid_fns_list[3, lasers[1]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
+    cuboid_fns_list[3, lasers[2]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
+    cuboid_fns_list[4, lasers[1]] = lambda x: x + (5 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED
+    cuboid_fns_list[4, lasers[2]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
+    cuboid_fns_list[5, lasers[2]] = lambda x: x + (6 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED
+
+    return closed_loop_steps(t, len(cuboid_fns_list), cuboid_fns_list, cutoff, notify)
+
+
+def four_d_cuboid(t, cutoff=CUTOFF, notify=default_notify, lasers=(0, 2, 1, 3)):
+    """
+    Makes a modulation of the potential by changing the phases of three lasers in a cuboid fashion
+    :param t: time
+    :param cutoff: size of the cuboid
+    :param notify: notify function
+    :param lasers: numbers of the lasers to define the plane of movement in parameter space
+    :return:
+    """
+    four_cuboid_fns_list = np.repeat(identity, NUMBER_OF_LASERS * 8).reshape(8, NUMBER_OF_LASERS)
+    four_cuboid_fns_list[0, lasers[0]] = lambda x: x + t * omega / POTENTIAL_CHANGE_SPEED
+    four_cuboid_fns_list[1, lasers[0]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
+    four_cuboid_fns_list[1, lasers[1]] = lambda x: x + (t * omega - cutoff) / POTENTIAL_CHANGE_SPEED
+    four_cuboid_fns_list[2, lasers[0]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
+    four_cuboid_fns_list[2, lasers[1]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
+    four_cuboid_fns_list[2, lasers[2]] = lambda x: x + (t * omega - 2 * cutoff) / POTENTIAL_CHANGE_SPEED
+    four_cuboid_fns_list[3, lasers[0]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
+    four_cuboid_fns_list[3, lasers[1]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
+    four_cuboid_fns_list[3, lasers[2]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
+    four_cuboid_fns_list[3, lasers[3]] = lambda x: x + (t * omega - 3 * cutoff) / POTENTIAL_CHANGE_SPEED
+    four_cuboid_fns_list[4, lasers[0]] = lambda x: x + (5 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED
+    four_cuboid_fns_list[4, lasers[1]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
+    four_cuboid_fns_list[4, lasers[2]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
+    four_cuboid_fns_list[4, lasers[3]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
+    four_cuboid_fns_list[5, lasers[1]] = lambda x: x + (6 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED
+    four_cuboid_fns_list[5, lasers[2]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
+    four_cuboid_fns_list[5, lasers[3]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
+    four_cuboid_fns_list[6, lasers[2]] = lambda x: x + (7 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED
+    four_cuboid_fns_list[6, lasers[3]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
+    four_cuboid_fns_list[7, lasers[3]] = lambda x: x + (8 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED
+
+    return closed_loop_steps(t, len(four_cuboid_fns_list), four_cuboid_fns_list, cutoff, notify)
+
+
+def circle_movement(t, radius, lasers=(0, 2), center_one=0, center_two=0, cutoff=CUTOFF):
     """
     Makes a circular motion assuming that we start at 3/2 pi angle
     :param t: time
     :param radius: circle radius
-    :param laser_one: number of the first laser in the plane of movement in parameter space
-    :param laser_two: number of the second in the plane of movement in parameter space
+    :param lasers: numbers of the lasers to define the plane of movement in parameter space
     :param center_one: center of circle in laser_one
     :param center_two: center of circle in laser_two
     :param cutoff: modulation size measure
     :return: phases of the lasers
     """
     ps = default_phases()
-    ps[laser_one, :] += (center_one - np.sin(t * omega / cutoff)) * radius
-    ps[laser_two, :] += (center_two - np.cos(t * omega / cutoff)) * radius
+    ps[lasers[0], :] += (center_one - np.sin(t * omega / cutoff)) * radius
+    ps[lasers[1], :] += (center_two - np.cos(t * omega / cutoff)) * radius
     return ps
 
 
-def square_movement(t, cutoff=CUTOFF, notify=default_notify, notify_bool=True, laser_one=0, laser_two=2):
+def square_movement(t, cutoff=CUTOFF, notify=default_notify, notify_bool=True, lasers=(0, 2)):
     """
     Makes a square movement in some coordinates
     :param cutoff: indicates thw size of the square
@@ -282,19 +334,18 @@ def square_movement(t, cutoff=CUTOFF, notify=default_notify, notify_bool=True, l
     :param notify_bool: whether to notify
     :return: final values of moving coordinates
     :param t: time
-    :param laser_one: number of the first laser in the plane of movement in parameter space
-    :param laser_two: number of the second in the plane of movement in parameter space
+    :param lasers: numbers of the lasers to define the plane of movement in parameter space
     """
     if t < 0:
         return default_phases()
 
     square_list_fns = np.repeat(identity, NUMBER_OF_LASERS * 4).reshape(4, NUMBER_OF_LASERS)
-    square_list_fns[0, laser_one] = lambda x: x + t * omega / POTENTIAL_CHANGE_SPEED
-    square_list_fns[1, laser_one] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
-    square_list_fns[1, laser_two] = lambda x: x + (t * omega - cutoff) / POTENTIAL_CHANGE_SPEED
-    square_list_fns[2, laser_one] = lambda x: x + (3 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED
-    square_list_fns[2, laser_two] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
-    square_list_fns[3, laser_two] = lambda x: x + (4 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED
+    square_list_fns[0, lasers[0]] = lambda x: x + t * omega / POTENTIAL_CHANGE_SPEED
+    square_list_fns[1, lasers[0]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
+    square_list_fns[1, lasers[1]] = lambda x: x + (t * omega - cutoff) / POTENTIAL_CHANGE_SPEED
+    square_list_fns[2, lasers[0]] = lambda x: x + (3 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED
+    square_list_fns[2, lasers[1]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
+    square_list_fns[3, lasers[1]] = lambda x: x + (4 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED
 
     return closed_loop_steps(t, 4, square_list_fns, cutoff, notify, notify_bool=notify_bool)
 
@@ -339,7 +390,8 @@ def default_phases(x_t=x, y_t=y):
 
     kxs, kys = k * np.cos(angles), k * np.sin(angles)
 
-    return (np.outer(kxs, x_t) + np.outer(kys, y_t)).reshape(NUMBER_OF_LASERS, GRID_SIZE, GRID_SIZE)
+    return (np.outer(kxs, x_t - WAVEPACKET_CENTER_X) + np.outer(kys, y_t - WAVEPACKET_CENTER_Y))\
+        .reshape(NUMBER_OF_LASERS, GRID_SIZE, GRID_SIZE)
 
 
 def notify_started(t, notify):
@@ -364,7 +416,9 @@ path_map = {
     PARALLELOGRAM: (parallelogram, 4),
     SEMICIRCLE: (semicircle, 2 + np.pi),
     CIRCLE: (circle, 2 * np.pi),
-    DOWN_CIRCLE: (down_and_circle, 2 + 2 * np.pi)
+    DOWN_CIRCLE: (down_and_circle, 2 + 2 * np.pi),
+    CUBOID: (cuboid, 6),
+    FOUR_CUBOID: (four_d_cuboid, 8)
 }
 
 
