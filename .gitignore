@@ -18,3 +18,4 @@ __pycache__/
 
 # config
 config.py
+plot_trajectories.py

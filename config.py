@@ -2,19 +2,19 @@ import numpy as np
 from consts import *
 
 METHOD = "cn"
-GRID_SIZE = 500
-WAVELENGTH = 100
-POTENTIAL_CHANGE_SPEED = 5
+GRID_SIZE = 300
+WAVELENGTH = 80
+POTENTIAL_CHANGE_SPEED = 4
 CUTOFF = 4
 START = 3
-PATH = FOUR_CUBOID
+PATH = MOVE_CIRCLE
 REPEATS = 2
 NUMBER_OF_LASERS = 4
 LASERS = (0, 2, 1, 3)
 V_0_REL = 3 * 4 * 10 ** 0  # Convenient to measure potential in recoil units
 M = 1
-WAVEPACKET_CENTER_X = 62
-WAVEPACKET_CENTER_Y = 62
+WAVEPACKET_CENTER_X = 34.04
+WAVEPACKET_CENTER_Y = 82.17
 TIME_STEP_REL = 0.1
 NORM = 'ortho'
 PLOT_SAVE_DIR_BASE = "/Users/gevorg/workspace/PartIII/Project/Plots/"

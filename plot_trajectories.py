@@ -11,7 +11,7 @@ def read_and_parse_input(filename):
     return lines
 
 
-lines = read_and_parse_input("{}circle_x_0_y_0_ssf_n_101_cutoff_300_grid_800_wavelength_80_timestep_0.1_lasernum_4_repeat_2/data.txt"
+lines = read_and_parse_input("{}move_square_x_72_y_72_ssf_n_100_cutoff_500_grid_1200_wavelength_70_timestep_0.2_lasernum_4_repeat_2/data.txt"
                              .format(PLOT_SAVE_DIR_BASE))
 
 idx_list = [idx + 1 for idx, val in enumerate(lines) if len(val.split("[")) == 1]

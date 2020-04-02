@@ -39,19 +39,6 @@ def make_modulation(t, notify):
         (omega * t) / duration // CUTOFF, REPEATS - 1)) / omega, cutoff=CUTOFF, notify=notify, lasers=LASERS)
 
 
-def propagate_sliding(t, cutoff=CUTOFF, notify=default_notify):
-    """
-    Slides the potential to have a new center keeping the form of the potential
-    :param t: time
-    :param cutoff: the size
-    :param notify: function for notifying
-    :return: the phases of the lasers
-    """
-    x_t, y_t = propagate_square(t, cutoff=cutoff, notify=notify)
-
-    return default_phases(x_t, y_t)
-
-
 def slide_x(t):
     """
     Slides the potential along negative x direction
@@ -61,7 +48,7 @@ def slide_x(t):
     return x + t * omega / POTENTIAL_CHANGE_SPEED / k, y
 
 
-def propagate_square(t, cutoff=CUTOFF, notify=default_notify):
+def propagate_square(t, cutoff=CUTOFF, notify=default_notify, lasers=LASERS):
     """
     Slides the potential in a square (left, up, right, down)
     :param t: time
@@ -69,10 +56,77 @@ def propagate_square(t, cutoff=CUTOFF, notify=default_notify):
     :param notify: notify function
     :return: new center position
     """
+    return propagate_generic(t, square_movement, cutoff=cutoff, notify=notify)
+
+
+def propagate_triangle(t, cutoff=CUTOFF, notify=default_notify, lasers=LASERS):
+    """
+    Slides the potential in a triangle (left up, right, left down)
+    :param t: time
+    :param cutoff: the size of the triangle
+    :param notify: notify function
+    :return: new center position
+    """
+    return propagate_generic(t, triangle, cutoff=cutoff, notify=notify)
+
+
+def propagate_parallelogram(t, cutoff=CUTOFF, notify=default_notify, lasers=LASERS):
+    """
+    Slides the potential in a triangle (left up, right, left down)
+    :param t: time
+    :param cutoff: the size of the triangle
+    :param notify: notify function
+    :return: new center position
+    """
+    return propagate_generic(t, parallelogram, cutoff=cutoff, notify=notify)
+
+
+def propagate_semicircle(t, cutoff=CUTOFF, notify=default_notify, lasers=LASERS):
+    """
+    Slides the potential in a triangle (left up, right, left down)
+    :param t: time
+    :param cutoff: the size of the triangle
+    :param notify: notify function
+    :return: new center position
+    """
+    return propagate_generic(t, semicircle, cutoff=cutoff, notify=notify)
+
+
+def propagate_circle(t, cutoff=CUTOFF, notify=default_notify, lasers=LASERS):
+    """
+    Slides the potential in a triangle (left up, right, left down)
+    :param t: time
+    :param cutoff: the size of the triangle
+    :param notify: notify function
+    :return: new center position
+    """
+    return propagate_generic(t, circle, cutoff=cutoff, notify=notify)
+
+
+def propagate_down_and_circle(t, cutoff=CUTOFF, notify=default_notify, lasers=LASERS):
+    """
+    Slides the potential in a triangle (left up, right, left down)
+    :param t: time
+    :param cutoff: the size of the triangle
+    :param notify: notify function
+    :return: new center position
+    """
+    return propagate_generic(t, down_and_circle, cutoff=cutoff, notify=notify)
+
+
+def propagate_generic(t, fn, cutoff=CUTOFF, notify=default_notify):
+    """
+    Slides the potential in a triangle (left up, right, left down)
+    :param t: time
+    :param fn: the function corresponding to the specific movement
+    :param cutoff: the size of the triangle
+    :param notify: notify function
+    :return: new center position
+    """
     l1, l2 = 0, 1
-    ps = np.array(square_movement(t, cutoff=cutoff, notify=notify, laser_one=l1, laser_two=l2))
+    ps = np.array(fn(t, cutoff=cutoff, notify=notify, lasers=(l1, l2)))
     defaults = default_phases()
-    return (ps[l1, :] - defaults[l1, :]) / k + x, (ps[l2, :] - defaults[l2, :]) / k + y
+    return default_phases((ps[l1, :] - defaults[l1, :]) / k + x, (ps[l2, :] - defaults[l2, :]) / k + y)
 
 
 def phase_single_laser(t):
@@ -94,7 +148,7 @@ def phase_single_square(t, cutoff=30, notify=default_notify, notify_bool=True, l
     :param lasers: numbers of the lasers to define the plane of movement in parameter space
     :return: phases of the lasers
     """
-    return square_movement(t, cutoff, notify=notify, notify_bool=notify_bool, laser_one=lasers)
+    return square_movement(t, cutoff, notify=notify, notify_bool=notify_bool, lasers=lasers)
 
 
 def phase_square_and_reverse(t, cutoff=30, notify=default_notify, lasers=(0, 2)):
@@ -410,7 +464,12 @@ def notify_finished(t, notify):
 
 # a map from path keyword to the function and duration of the cutoff
 path_map = {
-    MOVE_SQUARE: (propagate_sliding, 4),
+    MOVE_SQUARE: (propagate_square, 4),
+    MOVE_TRIANGLE: (propagate_triangle, 3),
+    MOVE_PARALLELOGRAM: (propagate_parallelogram, 4),
+    MOVE_SEMICIRCLE: (propagate_semicircle, 2 + np.pi),
+    MOVE_CIRCLE: (propagate_circle, 2 * np.pi),
+    MOVE_DOWN_CIRCLE: (propagate_down_and_circle, 2 + 2 * np.pi),
     SQUARE: (phase_single_square, 4),
     TRIANGLE: (triangle, 3),
     PARALLELOGRAM: (parallelogram, 4),

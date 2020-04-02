@@ -1,5 +1,10 @@
 # path name definitions
 MOVE_SQUARE = "move_square"
+MOVE_TRIANGLE = "move_triangle"
+MOVE_PARALLELOGRAM = "move_parallelogram"
+MOVE_SEMICIRCLE = "move_semicircle"
+MOVE_CIRCLE = "move_circle"
+MOVE_DOWN_CIRCLE = "move_down_circle"
 SQUARE = "square"
 TRIANGLE = "triangle"
 PARALLELOGRAM = "parallelogram"

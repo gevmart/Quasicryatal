@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt, colors, animation
 
 import plotting
 from config import *
-from potential import generate_potential, POTENTIAL_CHANGE_SPEED, CUTOFF
+from potential import generate_potential, POTENTIAL_CHANGE_SPEED, CUTOFF, minima, mins_only
 from generate_wavepacket import wavepacket
 from time_propagation_ssf import propagate_ssf
 from time_propagation_cn import propagate_cn
