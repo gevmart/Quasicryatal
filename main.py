@@ -86,8 +86,8 @@ def save_com_to_file(steps, v=float('nan')):
 
 
 print(time.time())
-# save_com_to_file(2000)
-calcualte_and_plot()
+save_com_to_file(5000)
+# calcualte_and_plot()
 # expansion_with_different_potential_strengths(100, propagate, METHOD)
 print(time.time())
 # ani.save("{}animation.gif".format(directory), writer='imagemagick', fps=10)

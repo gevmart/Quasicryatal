@@ -59,6 +59,17 @@ def propagate_square(t, cutoff=CUTOFF, notify=default_notify, lasers=LASERS):
     return propagate_generic(t, square_movement, cutoff=cutoff, notify=notify)
 
 
+def propagate_opposite_square(t, cutoff=CUTOFF, notify=default_notify, lasers=LASERS):
+    """
+    Slides the potential in a square (left, up, right, down)
+    :param t: time
+    :param cutoff: the size of the square
+    :param notify: notify function
+    :return: new center position
+    """
+    return propagate_generic(t, opposite_square_movement, cutoff=cutoff, notify=notify)
+
+
 def propagate_triangle(t, cutoff=CUTOFF, notify=default_notify, lasers=LASERS):
     """
     Slides the potential in a triangle (left up, right, left down)
@@ -68,6 +79,17 @@ def propagate_triangle(t, cutoff=CUTOFF, notify=default_notify, lasers=LASERS):
     :return: new center position
     """
     return propagate_generic(t, triangle, cutoff=cutoff, notify=notify)
+
+
+def propagate_triangle_right(t, cutoff=CUTOFF, notify=default_notify, lasers=LASERS):
+    """
+    Slides the potential in a triangle (left up, right, left down)
+    :param t: time
+    :param cutoff: the size of the triangle
+    :param notify: notify function
+    :return: new center position
+    """
+    return propagate_generic(t, triangle_right, cutoff=cutoff, notify=notify)
 
 
 def propagate_parallelogram(t, cutoff=CUTOFF, notify=default_notify, lasers=LASERS):
@@ -81,6 +103,28 @@ def propagate_parallelogram(t, cutoff=CUTOFF, notify=default_notify, lasers=LASE
     return propagate_generic(t, parallelogram, cutoff=cutoff, notify=notify)
 
 
+def propagate_parallelogram_x(t, cutoff=CUTOFF, notify=default_notify, lasers=LASERS):
+    """
+    Slides the potential in a triangle (left up, right, left down)
+    :param t: time
+    :param cutoff: the size of the triangle
+    :param notify: notify function
+    :return: new center position
+    """
+    return propagate_generic(t, parallelogram_x, cutoff=cutoff, notify=notify)
+
+
+def propagate_parallelogram_y(t, cutoff=CUTOFF, notify=default_notify, lasers=LASERS):
+    """
+    Slides the potential in a triangle (left up, right, left down)
+    :param t: time
+    :param cutoff: the size of the triangle
+    :param notify: notify function
+    :return: new center position
+    """
+    return propagate_generic(t, parallelogram_y, cutoff=cutoff, notify=notify)
+
+
 def propagate_semicircle(t, cutoff=CUTOFF, notify=default_notify, lasers=LASERS):
     """
     Slides the potential in a triangle (left up, right, left down)
@@ -90,6 +134,17 @@ def propagate_semicircle(t, cutoff=CUTOFF, notify=default_notify, lasers=LASERS)
     :return: new center position
     """
     return propagate_generic(t, semicircle, cutoff=cutoff, notify=notify)
+
+
+def propagate_double_semicircle(t, cutoff=CUTOFF, notify=default_notify, lasers=LASERS):
+    """
+    Slides the potential in a triangle (left up, right, left down)
+    :param t: time
+    :param cutoff: the size of the triangle
+    :param notify: notify function
+    :return: new center position
+    """
+    return propagate_generic(t, double_semicircle, cutoff=cutoff, notify=notify)
 
 
 def propagate_circle(t, cutoff=CUTOFF, notify=default_notify, lasers=LASERS):
@@ -151,6 +206,19 @@ def phase_single_square(t, cutoff=30, notify=default_notify, notify_bool=True, l
     return square_movement(t, cutoff, notify=notify, notify_bool=notify_bool, lasers=lasers)
 
 
+def phase_single_opposite_square(t, cutoff=30, notify=default_notify, notify_bool=True, lasers=(0, 2)):
+    """
+    Changes the phases of the lasers along x and y direction in a square fashion
+    :param t: time
+    :param cutoff: optional size of the square
+    :param notify: an optional method to be called when there is a need to notify
+    :param notify_bool: whether to notify
+    :param lasers: numbers of the lasers to define the plane of movement in parameter space
+    :return: phases of the lasers
+    """
+    return opposite_square_movement(t, cutoff, notify=notify, notify_bool=notify_bool, lasers=lasers)
+
+
 def phase_square_and_reverse(t, cutoff=30, notify=default_notify, lasers=(0, 2)):
     """
     Changes the phases of the lasers along x and y directions in a square fashion, then unwinds the square back.
@@ -194,6 +262,34 @@ def triangle(t, cutoff=30, notify=default_notify, lasers=(0, 2)):
     return closed_loop_steps(t, len(triangle_list_fns), triangle_list_fns, cutoff, notify)
 
 
+def triangle_right(t, cutoff=30, notify=default_notify, lasers=(0, 2)):
+    """
+    Changes the phases of x and y directed lasers in a right angle triangle
+    #--------
+    ##-------
+    #-#------
+    #--#-----
+    #---#----
+    #----#---
+    #-----#--
+    #-------#
+    #########
+    :param t: time
+    :param cutoff: size of the triangle
+    :param notify: a function to notify when the cycle starts and ends
+    :param lasers: numbers of the lasers to define the plane of movement in parameter space
+    :return: phases of the lasers
+    """
+    triangle_list_fns = np.repeat(identity, NUMBER_OF_LASERS * 3).reshape(3, NUMBER_OF_LASERS)
+    triangle_list_fns[0, lasers[1]] = lambda x: x - t * omega / POTENTIAL_CHANGE_SPEED
+    triangle_list_fns[1, lasers[0]] = lambda x: x + (t * omega - cutoff) / POTENTIAL_CHANGE_SPEED
+    triangle_list_fns[1, lasers[1]] = lambda x: x - cutoff / POTENTIAL_CHANGE_SPEED
+    triangle_list_fns[2, lasers[0]] = lambda x: x - (t * omega - (2 + 2 ** 0.5) * cutoff) / POTENTIAL_CHANGE_SPEED / 2 ** 0.5
+    triangle_list_fns[2, lasers[1]] = lambda x: x + (t * omega - (2 + 2 ** 0.5) * cutoff) / POTENTIAL_CHANGE_SPEED / 2 ** 0.5
+
+    return closed_loop_steps(t, len(triangle_list_fns), triangle_list_fns, cutoff, notify, intervals=(1, 1, 2 ** 0.5))
+
+
 def parallelogram(t, cutoff=30, notify=default_notify, lasers=(0, 2)):
     """
     Changes the phases of x and y directed lasers in a counterclockwise parallelogram with pi/3 angle
@@ -225,6 +321,63 @@ def parallelogram(t, cutoff=30, notify=default_notify, lasers=(0, 2)):
     return closed_loop_steps(t, len(parallelogram_fns_list), parallelogram_fns_list, cutoff, notify)
 
 
+def parallelogram_x(t, cutoff=30, notify=default_notify, lasers=(0, 2)):
+    """
+    Changes the phases of x and y directed lasers in a counterclockwise parallelogram with pi/3 angle
+    ----##########
+    ---#--------#-
+    --#--------#--
+    -#--------#---
+    ##########----
+    :param t: time
+    :param cutoff: size of the triangle
+    :param notify: a function to notify when the cycle starts and ends
+    :param lasers: numbers of the lasers to define the plane of movement in parameter space
+    :return: phases of the lasers
+    """
+    parallelogram_fns_list = np.repeat(identity, NUMBER_OF_LASERS * 4).reshape(4, NUMBER_OF_LASERS)
+    parallelogram_fns_list[0, lasers[0]] = lambda x: x - t * omega / POTENTIAL_CHANGE_SPEED
+    parallelogram_fns_list[1, lasers[0]] = lambda x: x + (t * omega - 3 * cutoff) / POTENTIAL_CHANGE_SPEED / 2
+    parallelogram_fns_list[1, lasers[1]] = lambda x: x + (t * omega - cutoff) / POTENTIAL_CHANGE_SPEED * 3 ** 0.5 / 2
+    parallelogram_fns_list[2, lasers[0]] = lambda x: x + (2 * t * omega - 5 * cutoff) / POTENTIAL_CHANGE_SPEED / 2
+    parallelogram_fns_list[2, lasers[1]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED * 3 ** 0.5 / 2
+    parallelogram_fns_list[3, lasers[0]] = lambda x: x + (4 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED / 2
+    parallelogram_fns_list[3, lasers[1]] = lambda x: x + (4 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED * 3 ** 0.5 / 2
+
+    return closed_loop_steps(t, len(parallelogram_fns_list), parallelogram_fns_list, cutoff, notify)
+
+
+def parallelogram_y(t, cutoff=30, notify=default_notify, lasers=(0, 2)):
+    """
+    Changes the phases of x and y directed lasers in a counterclockwise parallelogram with pi/3 angle
+    #---------
+    ##--------
+    #-#-------
+    #--#------
+    #---#-----
+    #---#-----
+    ##--#-----
+    --#-#-----
+    ---##-----
+    ----#-----
+    :param t: time
+    :param cutoff: size of the triangle
+    :param notify: a function to notify when the cycle starts and ends
+    :param lasers: numbers of the lasers to define the plane of movement in parameter space
+    :return: phases of the lasers
+    """
+    parallelogram_fns_list = np.repeat(identity, NUMBER_OF_LASERS * 4).reshape(4, NUMBER_OF_LASERS)
+    parallelogram_fns_list[0, lasers[1]] = lambda x: x - t * omega / POTENTIAL_CHANGE_SPEED
+    parallelogram_fns_list[1, lasers[0]] = lambda x: x + (t * omega - cutoff) / POTENTIAL_CHANGE_SPEED * 3 ** 0.5 / 2
+    parallelogram_fns_list[1, lasers[1]] = lambda x: x + (t * omega - 3 * cutoff) / POTENTIAL_CHANGE_SPEED / 2
+    parallelogram_fns_list[2, lasers[0]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED * 3 ** 0.5 / 2
+    parallelogram_fns_list[2, lasers[1]] = lambda x: x + (2 * t * omega - 5 * cutoff) / POTENTIAL_CHANGE_SPEED / 2
+    parallelogram_fns_list[3, lasers[0]] = lambda x: x + (4 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED * 3 ** 0.5 / 2
+    parallelogram_fns_list[3, lasers[1]] = lambda x: x + (4 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED / 2
+
+    return closed_loop_steps(t, len(parallelogram_fns_list), parallelogram_fns_list, cutoff, notify)
+
+
 def semicircle(t, cutoff=30, notify=default_notify, lasers=(0, 2)):
     """
     Changes the phases of x and y directed lasers in a counterclockwise semicircle
@@ -246,6 +399,41 @@ def semicircle(t, cutoff=30, notify=default_notify, lasers=(0, 2)):
     semicircle_list_fns[2, lasers[0]] = lambda x: x - (t * omega - (2 + np.pi) * cutoff) / POTENTIAL_CHANGE_SPEED
 
     return closed_loop_steps(t, len(semicircle_list_fns), semicircle_list_fns, cutoff, notify, intervals=[1, np.pi, 1])
+
+
+def double_semicircle(t, cutoff=30, notify=default_notify, lasers=(0, 2), radia_ratio=2):
+    """
+    Changes the phases of x and y directed lasers in a two semicircles semicircle
+    -----#######-----
+    ----#-------#----
+    ---#---------#---
+    --#---#####---#--
+    -#---#-----#---#-
+    #---#-------#---#
+    #####-------######
+    :param t: time
+    :param cutoff: size of the bigger semicircle
+    :param notify: a function to notify when the cycle starts and ends
+    :param lasers: numbers of the lasers to define the plane of movement in parameter space
+    :param radia_ratio: the ratio of the radii of two semicircles
+    :return: phases of the lasers
+    """
+    radius_big = cutoff / POTENTIAL_CHANGE_SPEED
+    radius_small = radius_big / radia_ratio
+    semicircle_list_fns = np.repeat(identity, NUMBER_OF_LASERS * 4).reshape(4, NUMBER_OF_LASERS)
+
+    semicircle_list_fns[0, lasers[0]] = lambda x: x + radius_big * (-np.cos(t * omega / cutoff) + 1)
+    semicircle_list_fns[0, lasers[1]] = lambda x: x + radius_big * np.sin(t * omega / cutoff)
+    semicircle_list_fns[1, lasers[0]] = lambda x: x + 2 * radius_big - (t * omega - np.pi * cutoff) / POTENTIAL_CHANGE_SPEED
+    semicircle_list_fns[2, lasers[0]] = lambda x: x + radius_big + radius_small * \
+                                                  np.cos(radia_ratio * (t * omega / cutoff - (np.pi + 1 - 1 / radia_ratio)))
+    semicircle_list_fns[2, lasers[1]] = lambda x: x + radius_small * \
+                                                  np.sin(radia_ratio * (t * omega / cutoff - (np.pi + 1 - 1 / radia_ratio)))
+    semicircle_list_fns[3, lasers[0]] = lambda x: x - (t * omega - (np.pi * (1 + 1 / radia_ratio)
+                                                       + 2 - 2 / radia_ratio) * cutoff) / POTENTIAL_CHANGE_SPEED
+
+    return closed_loop_steps(t, len(semicircle_list_fns), semicircle_list_fns, cutoff, notify,
+                             intervals=[np.pi, 1 - 1 / radia_ratio, np.pi / radia_ratio, 1 - 1 / radia_ratio])
 
 
 def circle(t, cutoff=30, notify=default_notify, lasers=(0, 2)):
@@ -404,6 +592,30 @@ def square_movement(t, cutoff=CUTOFF, notify=default_notify, notify_bool=True, l
     return closed_loop_steps(t, 4, square_list_fns, cutoff, notify, notify_bool=notify_bool)
 
 
+def opposite_square_movement(t, cutoff=CUTOFF, notify=default_notify, notify_bool=True, lasers=(0, 2)):
+    """
+    Makes a square movement in some coordinates
+    :param cutoff: indicates thw size of the square
+    :param notify: an optional method to be called when there is a need to notify
+    :param notify_bool: whether to notify
+    :return: final values of moving coordinates
+    :param t: time
+    :param lasers: numbers of the lasers to define the plane of movement in parameter space
+    """
+    if t < 0:
+        return default_phases()
+
+    square_list_fns = np.repeat(identity, NUMBER_OF_LASERS * 4).reshape(4, NUMBER_OF_LASERS)
+    square_list_fns[0, lasers[0]] = lambda x: x - t * omega / POTENTIAL_CHANGE_SPEED
+    square_list_fns[1, lasers[0]] = lambda x: x - cutoff / POTENTIAL_CHANGE_SPEED
+    square_list_fns[1, lasers[1]] = lambda x: x + (t * omega - cutoff) / POTENTIAL_CHANGE_SPEED
+    square_list_fns[2, lasers[0]] = lambda x: x - (3 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED
+    square_list_fns[2, lasers[1]] = lambda x: x + cutoff / POTENTIAL_CHANGE_SPEED
+    square_list_fns[3, lasers[1]] = lambda x: x + (4 * cutoff - t * omega) / POTENTIAL_CHANGE_SPEED
+
+    return closed_loop_steps(t, 4, square_list_fns, cutoff, notify, notify_bool=notify_bool)
+
+
 def closed_loop_steps(t, steps, fns_list, cutoff, notify, intervals=None, notify_bool=True):
     """
     Returns the phases of a general closed loop of a shape given by fns_list
@@ -445,6 +657,11 @@ def default_phases(x_t=x, y_t=y):
     kxs, kys = k * np.cos(angles), k * np.sin(angles)
 
     return (np.outer(kxs, x_t - WAVEPACKET_CENTER_X) + np.outer(kys, y_t - WAVEPACKET_CENTER_Y))\
+        .reshape(NUMBER_OF_LASERS, GRID_SIZE, GRID_SIZE) + (noise() if NOISE and started and not finished else 0)
+
+
+def noise(std=0.002):
+    return np.random.normal(scale=std, size=NUMBER_OF_LASERS).repeat(GRID_SIZE ** 2)\
         .reshape(NUMBER_OF_LASERS, GRID_SIZE, GRID_SIZE)
 
 
@@ -465,15 +682,25 @@ def notify_finished(t, notify):
 # a map from path keyword to the function and duration of the cutoff
 path_map = {
     MOVE_SQUARE: (propagate_square, 4),
+    MOVE_OPPOSITE_SQUARE: (propagate_opposite_square, 4),
     MOVE_TRIANGLE: (propagate_triangle, 3),
+    MOVE_TRIANGLE_RIGHT: (propagate_triangle_right, 2 + 2 ** 0.5),
     MOVE_PARALLELOGRAM: (propagate_parallelogram, 4),
+    MOVE_PARALLELOGRAM_X: (propagate_parallelogram_x, 4),
+    MOVE_PARALLELOGRAM_Y: (propagate_parallelogram_y, 4),
     MOVE_SEMICIRCLE: (propagate_semicircle, 2 + np.pi),
+    MOVE_DOUBLE_SEMICIRCLE: (propagate_double_semicircle, np.pi * 3 / 2 + 1),
     MOVE_CIRCLE: (propagate_circle, 2 * np.pi),
     MOVE_DOWN_CIRCLE: (propagate_down_and_circle, 2 + 2 * np.pi),
     SQUARE: (phase_single_square, 4),
+    OPPOSITE_SQUARE: (phase_single_opposite_square, 4),
     TRIANGLE: (triangle, 3),
+    TRIANGLE_RIGHT: (triangle_right, 2 + 2 ** 0.5),
     PARALLELOGRAM: (parallelogram, 4),
+    PARALLELOGRAM_X: (parallelogram_x, 4),
+    PARALLELOGRAM_Y: (parallelogram_y, 4),
     SEMICIRCLE: (semicircle, 2 + np.pi),
+    DOUBLE_SEMICIRCLE: (double_semicircle, np.pi * 3 / 2 + 1),
     CIRCLE: (circle, 2 * np.pi),
     DOWN_CIRCLE: (down_and_circle, 2 + 2 * np.pi),
     CUBOID: (cuboid, 6),
