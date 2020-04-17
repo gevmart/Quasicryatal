@@ -1,0 +1,170 @@
+1584019256.8529987
+Traceback (most recent call last):
+  File "main.py", line 89, in <module>
+    save_com_to_file(2000)
+  File "main.py", line 69, in save_com_to_file
+    copy_code(directory_to_save)
+  File "/home/gevorg/quasicrystal/utils.py", line 17, in copy_code
+    for file in os.listdir(CODE_PATH):
+NameError: name 'CODE_PATH' is not defined
+1584019485.3607893
+Traceback (most recent call last):
+  File "main.py", line 89, in <module>
+    save_com_to_file(2000)
+  File "main.py", line 69, in save_com_to_file
+    copy_code(directory_to_save)
+  File "/home/gevorg/quasicrystal/utils.py", line 17, in copy_code
+    for file in os.listdir(CODE_PATH):
+NameError: name 'CODE_PATH' is not defined
+1584019585.6691513
+Traceback (most recent call last):
+  File "main.py", line 89, in <module>
+    save_com_to_file(2000)
+  File "main.py", line 69, in save_com_to_file
+    copy_code(directory_to_save)
+  File "/home/gevorg/quasicrystal/utils.py", line 17, in copy_code
+    for file in os.listdir(CODE_PATH):
+NameError: name 'CODE_PATH' is not defined
+1584019628.3423629
+Traceback (most recent call last):
+  File "main.py", line 89, in <module>
+    save_com_to_file(2000)
+  File "main.py", line 69, in save_com_to_file
+    copy_code(directory_to_save)
+  File "/home/gevorg/quasicrystal/utils.py", line 17, in copy_code
+    for file in os.listdir(CODE_PATH):
+NameError: name 'CODE_PATH' is not defined
+1584021397.694547
+Traceback (most recent call last):
+  File "main.py", line 89, in <module>
+    save_com_to_file(2000)
+  File "main.py", line 69, in save_com_to_file
+    copy_code(directory_to_save)
+  File "/home/gevorg/quasicrystal/utils.py", line 17, in copy_code
+    for file in os.listdir(CODE_PATH):
+NameError: name 'CODE_PATH' is not defined
+1584021496.8217525
+Traceback (most recent call last):
+  File "main.py", line 89, in <module>
+    save_com_to_file(2000)
+  File "main.py", line 84, in save_com_to_file
+    + probability_lower_edge(wavefunction) + os.linesep)
+  File "/home/gevorg/quasicrystal/utils.py", line 56, in probability_at_edges
+    np.sum(np.abs(wavefunction[edge_length:-edge_length, edge_length:-edge_length]) ** 2)
+TypeError: slice indices must be integers or None or have an __index__ method
+1584022305.2165318
+Traceback (most recent call last):
+  File "main.py", line 86, in <module>
+    save_com_to_file(2000)
+  File "main.py", line 81, in save_com_to_file
+    file.write(str(avg) + "   " + str(rms) + "   " + str(t) + "  " + str(time.time()) + "   " + probability_at_edges(wavefunction) + "   " + probability_left_edge(wavefunction) + "   " + probability_right_edge(wavefunction) + "   " + probability_upper_edge(wavefunction) + "   " + probability_lower_edge(wavefunction) + os.linesep)
+TypeError: must be str, not numpy.float64
+1584022755.8148742
+1584049076.1325035
+1584034859.373767
+1584089623.2375393
+1584097806.3389707
+1584227271.6847932
+1584194558.3004646
+1584440917.0420208
+1584615196.6172721
+1584693983.568588
+1584788528.193803
+1584788529.0840547
+Traceback (most recent call last):
+  File "main.py", line 7, in <module>
+    from config import *
+  File "/home/gevorg/quasicrystal/config.py", line 11, in <module>
+    REPEATS = q
+NameError: name 'q' is not defined
+1584884766.1288285
+1584931748.6882725
+Traceback (most recent call last):
+  File "main.py", line 7, in <module>
+    from config import *
+  File "/home/gevorg/quasicrystal/config.py", line 11, in <module>
+    REPEATS = q
+NameError: name 'q' is not defined
+1584956201.8319263
+Traceback (most recent call last):
+  File "main.py", line 89, in <module>
+    save_com_to_file(7000)
+  File "main.py", line 69, in save_com_to_file
+    copy_code(directory_to_save)
+  File "/home/gevorg/quasicrystal/utils.py", line 16, in copy_code
+    os.mkdir(directory)
+FileNotFoundError: [Errno 2] No such file or directory: '/Users/gevorg/workspace/PartIII/Project/Plots/down_circle_x_0_y_0_ssf_n_101_cutoff_350_grid_800_wavelength_60_timestep_0.1_lasernum_4_repeat_2/'
+1584956257.5831516
+1585029690.479056
+1584984842.4002366
+1585117502.7580912
+1585132311.0271742
+Traceback (most recent call last):
+  File "main.py", line 89, in <module>
+    save_com_to_file(4000)
+  File "main.py", line 76, in save_com_to_file
+    wavef, com, rms = propagate(wavef, t, n, v, notify=write_notification_to_file)
+  File "/home/gevorg/quasicrystal/time_propagation_ssf.py", line 10, in propagate_ssf
+    wavefunction *= np.exp(-1j * generate_potential(t + i * time_step, v, notify=notify) * time_step / 2)
+  File "/home/gevorg/quasicrystal/potential.py", line 25, in generate_potential
+    phases = default_phases() if t < 0 else make_modulation(t, notify)
+  File "/home/gevorg/quasicrystal/potential.py", line 39, in make_modulation
+    (omega * t) / duration // CUTOFF, REPEATS - 1)) / omega, cutoff=CUTOFF, notify=notify, lasers=LASERS)
+  File "/home/gevorg/quasicrystal/potential.py", line 50, in propagate_sliding
+    x_t, y_t = propagate_square(t, cutoff=cutoff, notify=notify, lasers=lasers)
+  File "/home/gevorg/quasicrystal/potential.py", line 73, in propagate_square
+    ps = np.array(square_movement(t, cutoff=cutoff, notify=notify, lasera=lasers))
+TypeError: square_movement() got an unexpected keyword argument 'lasera'
+1585143543.0469923
+1585181870.2350557
+1585254385.1246488
+1585488665.8044565
+1585836306.8322453
+1585836307.855926
+1585836368.278478
+Traceback (most recent call last):
+  File "main.py", line 89, in <module>
+    save_com_to_file(5000)
+  File "main.py", line 69, in save_com_to_file
+    copy_code(directory_to_save)
+  File "/home/gevorg/quasicrystal/utils.py", line 16, in copy_code
+    os.mkdir(directory)
+FileNotFoundError: [Errno 2] No such file or directory: '/Users/gevorg/workspace/PartIII/Project/Plots/move_parallelogram_x_82_y_82_cn_n_100_cutoff_800_grid_800_wavelength_80_timestep_0.1_lasernum_4_repeat_2/'
+1585836440.3687465
+1586007738.707906
+1586017214.40584
+1586160581.0164075
+1586016331.6043358
+1586253470.8613904
+1586175230.1824594
+1586260599.1669903
+Traceback (most recent call last):
+  File "main.py", line 7, in <module>
+    from config import *
+  File "/home/gevorg/quasicrystal/config.py", line 10, in <module>
+    PATH = MOVE_PARALELLOGRAM_X
+NameError: name 'MOVE_PARALELLOGRAM_X' is not defined
+Traceback (most recent call last):
+  File "main.py", line 7, in <module>
+    from config import *
+  File "/home/gevorg/quasicrystal/config.py", line 10, in <module>
+    PATH = MOVE_PARALLELOGRAM_X
+NameError: name 'MOVE_PARALLELOGRAM_X' is not defined
+Traceback (most recent call last):
+  File "main.py", line 7, in <module>
+    from config import *
+  File "/home/gevorg/quasicrystal/config.py", line 10, in <module>
+    PATH = MOVE_PARALLELOGRAM_X
+NameError: name 'MOVE_PARALLELOGRAM_X' is not defined
+1586305724.0025587
+1586425129.6159513
+1586607935.3688557
+1586676552.5651822
+1586771695.1727371
+1586843299.5464594
+1586938123.3392212
+1587010037.5174522
+1587026516.9437444
+1587080920.584947
+1587114254.3830802
+1587151416.0153625
