@@ -24,7 +24,7 @@ def generate_potential(t, v=float('nan'), notify=default_notify):
     t -= START / omega
     phases = default_phases() if t < 0 else make_modulation(t, notify)
 
-    return -v / NUMBER_OF_LASERS * np.sum(np.cos(phases) ** 2, axis=0) if not FIVE_FOLD else\
+    return -v / NUMBER_OF_LASERS * np.sum(np.cos(phases) ** 2, axis=0) if not NON_RETROREFLECTIVE else\
         -v / NUMBER_OF_LASERS * np.abs(np.sum(np.exp(1j * phases), axis=0)) ** 2
 
 
@@ -654,7 +654,7 @@ def default_phases(x_t=x, y_t=y):
     :return: the default phases of laser if there was no modulation
     """
     angles = np.arange(NUMBER_OF_LASERS) * np.pi / NUMBER_OF_LASERS
-    if FIVE_FOLD:
+    if NON_RETROREFLECTIVE:
         angles *= 2
 
     kxs, kys = k * np.cos(angles), k * np.sin(angles)
