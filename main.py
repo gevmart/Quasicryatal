@@ -65,15 +65,12 @@ def benchmark(n):
 
 
 def save_com_to_file(steps, v=float('nan')):
-    global wavef
     avg = np.array([0.0, 0.0])
     wavef = wavepacket
     n = 10
     t = 0
 
-    directory_to_save = "{}{}_x_{}_y_{}_{}_n_{}_cutoff_{}_grid_{}_wavelength_{}_timestep_{}_lasernum_{}_repeat_{}_retroreflective_{}/".format(
-        PLOT_SAVE_DIR_BASE, PATH, WAVEPACKET_CENTER_X, WAVEPACKET_CENTER_Y, METHOD,
-        POTENTIAL_CHANGE_SPEED, CUTOFF, GRID_SIZE, WAVELENGTH, TIME_STEP_REL, NUMBER_OF_LASERS, REPEATS, not NON_RETROREFLECTIVE)
+    directory_to_save = "{}{}_potential_{}_x_{}_y_{}_{}_n_{}_cutoff_{}_grid_{}_wavelength_{}_timestep_{}_lasernum_{}_repeat_{}_retroreflective_{}/".format(PLOT_SAVE_DIR_BASE, PATH, V_0_REL / NUMBER_OF_LASERS, WAVEPACKET_CENTER_X, WAVEPACKET_CENTER_Y, METHOD,POTENTIAL_CHANGE_SPEED, CUTOFF, GRID_SIZE, WAVELENGTH, TIME_STEP_REL, NUMBER_OF_LASERS, REPEATS, not NON_RETROREFLECTIVE)
     copy_code(directory_to_save)
 
     def write_notification_to_file(message, write_wavefunction=True):
@@ -103,7 +100,7 @@ def save_com_to_file(steps, v=float('nan')):
 
 
 print(time.time())
-save_com_to_file(5000)
+save_com_to_file(7000)
 # calcualte_and_plot()
 # expansion_with_different_potential_strengths(100, propagate, METHOD)
 print(time.time())
