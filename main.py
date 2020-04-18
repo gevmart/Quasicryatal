@@ -29,12 +29,19 @@ def calcualte_and_plot(v=float('nan')):
     im_wave = plotting.heatmap(np.absolute(wavepacket) ** 2, x / WAVELENGTH, y / WAVELENGTH, ax,
                                cbarlabel="Normalized Wavefunction", cmap='alpha')
     plotting.annotate(fig, ax, "Wavefunction evolution", r"$x/\lambda$", r"$y/\lambda$")
+    start_point = np.zeros((GRID_SIZE, GRID_SIZE))
+    # center_x = GRID_SIZE // 2 - (878 - WAVEPACKET_CENTER_X)
+    # center_y = GRID_SIZE // 2 - (1160 - WAVEPACKET_CENTER_Y)
+    center_x = GRID_SIZE // 2 - (WAVEPACKET_CENTER_X)
+    center_y = GRID_SIZE // 2 - (WAVEPACKET_CENTER_Y)
+    start_point[center_y - 10:center_y + 10, center_x - 10:center_x + 10] = 1
+    plotting.heatmap(start_point, x / WAVELENGTH, y / WAVELENGTH, ax, cmap='alpha')
     # plotting.heatmap(minima, x / WAVELENGTH, y / WAVELENGTH, ax, cmap='alpha')
     n = 10
 
     def animate(i):
         global wavefunction, t
-        wavefunction, com, rms = propagate(wavefunction, t, n, v=12)
+        wavefunction, com, rms = propagate(wavefunction, t, n)
         t += time_step * n
         im_pot.set_data(generate_potential(t, v) / v_rec)
         probability_density = np.absolute(wavefunction) ** 2
@@ -46,7 +53,7 @@ def calcualte_and_plot(v=float('nan')):
               probability_lower_edge(wavefunction))
         return im_wave
 
-    ani = animation.FuncAnimation(fig, animate, frames=200, repeat=True, interval=100)
+    # ani = animation.FuncAnimation(fig, animate, frames=200, repeat=True, interval=100)
 
     # plt.show()
 
@@ -63,12 +70,15 @@ def save_com_to_file(steps, v=float('nan')):
     n = 10
     t = 0
 
-    directory_to_save = "{}{}_potential_{}_x_{}_y_{}_{}_n_{}_cutoff_{}_grid_{}_wavelength_{}_timestep_{}_lasernum_{}_repeat_{}/".format(PLOT_SAVE_DIR_BASE, PATH, V_0_REL / NUMBER_OF_LASERS, WAVEPACKET_CENTER_X, WAVEPACKET_CENTER_Y, METHOD, POTENTIAL_CHANGE_SPEED, CUTOFF, GRID_SIZE, WAVELENGTH, TIME_STEP_REL, NUMBER_OF_LASERS, REPEATS)
+    directory_to_save = "{}{}_potential_{}_x_{}_y_{}_{}_n_{}_cutoff_{}_grid_{}_wavelength_{}_timestep_{}_lasernum_{}_repeat_{}_retroreflective_{}/".format(PLOT_SAVE_DIR_BASE, PATH, V_0_REL / NUMBER_OF_LASERS, WAVEPACKET_CENTER_X, WAVEPACKET_CENTER_Y, METHOD,POTENTIAL_CHANGE_SPEED, CUTOFF, GRID_SIZE, WAVELENGTH, TIME_STEP_REL, NUMBER_OF_LASERS, REPEATS, not NON_RETROREFLECTIVE)
     copy_code(directory_to_save)
 
-    def write_notification_to_file(message):
+    def write_notification_to_file(message, write_wavefunction=True):
         with open("{}data.txt".format(directory_to_save), 'a') as file:
             file.write(message + os.linesep)
+        print(message)
+        if write_wavefunction:
+            np.save("{}{}_wavefunction".format(directory_to_save, message), wavef)
 
     for i in np.arange(steps):
         wavef, com, rms = propagate(wavef, t, n, v, notify=write_notification_to_file)
@@ -80,6 +90,7 @@ def save_com_to_file(steps, v=float('nan')):
                            str(probability_at_edges(wavef)) + "   " + str(probability_left_edge(wavef)) + "   " +
                            str(probability_right_edge(wavef)) + "   " + str(probability_upper_edge(wavef)) + "   "
                            + str(probability_lower_edge(wavef)) + os.linesep)
+
             avg = np.array([0.0, 0.0])
 
 
