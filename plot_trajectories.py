@@ -11,7 +11,7 @@ def read_and_parse_input(filename):
     return lines
 
 
-lines = read_and_parse_input("{}move_triangle_potential_2.0_x_762_y_1160_ssf_n_100_cutoff_800_grid_800_wavelength_80_timestep_0.2_lasernum_4_repeat_2/data.txt"
+lines = read_and_parse_input("{}move_triangle_potential_0.1_x_929_y_1093_ssf_n_100_cutoff_800_grid_800_wavelength_80_timestep_0.2_lasernum_5_repeat_2_retroreflective_False/data.txt"
                              .format(PLOT_SAVE_DIR_BASE))
 
 idx_list = [idx + 1 for idx, val in enumerate(lines) if len(val.split("[")) == 1]

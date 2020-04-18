@@ -5,7 +5,7 @@ from matplotlib import pyplot as plt, colors, animation
 
 import plotting
 from config import *
-from potential import generate_potential, POTENTIAL_CHANGE_SPEED, CUTOFF, minima, mins_only
+from potential import generate_potential, POTENTIAL_CHANGE_SPEED, CUTOFF, minima, mins_only, path_map
 from generate_wavepacket import wavepacket
 from time_propagation_ssf import propagate_ssf
 from time_propagation_cn import propagate_cn
@@ -84,6 +84,7 @@ def save_com_to_file(steps, v=float('nan')):
             np.save("{}{}_wavefunction".format(directory_to_save, message), wavef)
 
     for i in np.arange(steps):
+        k = 0
         wavef, com, rms = propagate(wavef, t, n, v, notify=write_notification_to_file)
         t += n * time_step
         avg = (avg * (i % 10) + com) / (i % 10 + 1)
@@ -95,6 +96,10 @@ def save_com_to_file(steps, v=float('nan')):
                            + str(probability_lower_edge(wavef)) + os.linesep)
 
             avg = np.array([0.0, 0.0])
+
+        if t * omega - START > REPEATS * CUTOFF * path_map[PATH][1] and i % 100 == 99:
+            np.save("{}{}_wavefunction".format(directory_to_save, k), wavef)
+            k += 1
 
 
 print(time.time())
