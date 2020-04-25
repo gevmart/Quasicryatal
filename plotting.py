@@ -3,13 +3,14 @@ import numpy as np
 from matplotlib.colors import LinearSegmentedColormap
 
 
-def annotate(fig, ax, title, xlabel, ylabel):
-    ax.set_title(title)
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
+def annotate(fig, ax, title, xlabel, ylabel, fontsize=16):
+    ax.set_title(title, fontsize=fontsize)
+    ax.set_xlabel(xlabel, fontsize=fontsize)
+    ax.set_ylabel(ylabel, fontsize=fontsize)
+    ax.tick_params(labelsize=fontsize)
 
 
-def heatmap(data, x, y, ax=None, cbarlabel="", **kwargs):
+def heatmap(data, x, y, ax=None, cbarlabel="", fontsize=16, **kwargs):
     if not ax:
         ax = plt.gca()
 
@@ -31,6 +32,7 @@ def heatmap(data, x, y, ax=None, cbarlabel="", **kwargs):
 
     if cbarlabel != "":
         cbar = ax.figure.colorbar(im, ax=ax)
-        cbar.ax.set_ylabel(cbarlabel, rotation=-90, va="bottom")
+        cbar.ax.set_ylabel(cbarlabel, rotation=-90, va="bottom", fontsize=fontsize)
+        cbar.ax.tick_params(labelsize=fontsize)
 
     return im

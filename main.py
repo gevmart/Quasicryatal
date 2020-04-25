@@ -1,4 +1,5 @@
 import numpy as np
+from pathlib import Path
 import os
 import time
 from matplotlib import pyplot as plt, colors, animation
@@ -11,6 +12,7 @@ from time_propagation_ssf import propagate_ssf
 from time_propagation_cn import propagate_cn
 from utils import *
 from testing_simulation import expansion_with_different_potential_strengths, expansion_without_potential
+from hermites import generate_hermite
 
 # %%
 propagate = propagate_cn if METHOD == "cn" else propagate_ssf
@@ -25,20 +27,18 @@ def calcualte_and_plot(v=float('nan')):
 
     fig, ax = plt.subplots()
     im_pot = plotting.heatmap(generate_potential(0, v) / v_rec, x / WAVELENGTH, y / WAVELENGTH,
-                              ax, cbarlabel="Potential / Recoil Energy", cmap=plt.cm.gray)
-    im_wave = plotting.heatmap(np.absolute(wavepacket) ** 2, x / WAVELENGTH, y / WAVELENGTH, ax,
-                               cbarlabel="Normalized Wavefunction", cmap='alpha')
-    plotting.annotate(fig, ax, "Wavefunction evolution", r"$x/\lambda$", r"$y/\lambda$")
-    start_point = np.zeros((GRID_SIZE, GRID_SIZE))
-    # center_x = GRID_SIZE // 2 - (878 - WAVEPACKET_CENTER_X)
-    # center_y = GRID_SIZE // 2 - (1160 - WAVEPACKET_CENTER_Y)
-    center_x = GRID_SIZE // 2 - (WAVEPACKET_CENTER_X)
-    center_y = GRID_SIZE // 2 - (WAVEPACKET_CENTER_Y)
-    start_point[center_y - 10:center_y + 10, center_x - 10:center_x + 10] = 1
-    plotting.heatmap(start_point, x / WAVELENGTH, y / WAVELENGTH, ax, cmap='alpha')
+                              ax, cbarlabel="Potential / Recoil Energy", cmap=plt.cm.gray, fontsize=22)
+    im_wave = plotting.heatmap(np.absolute(wavepacket) ** 2, x / WAVELENGTH, y / WAVELENGTH, ax, cmap='alpha')
+    plotting.annotate(fig, ax, "Starting point of modulation", r"$x/\lambda$", r"$y/\lambda$", fontsize=22)
+    # start_point = np.zeros((GRID_SIZE, GRID_SIZE))
+    # center_x = GRID_SIZE // 2 - (929 - WAVEPACKET_CENTER_X)
+    # center_y = GRID_SIZE // 2 - (1093 - WAVEPACKET_CENTER_Y)
+    # center_x = GRID_SIZE // 2 + WAVEPACKET_CENTER_X
+    # center_y = GRID_SIZE // 2 + WAVEPACKET_CENTER_Y
+    # start_point[center_y - 3:center_y + 3, center_x - 3:center_x + 3] = 1
+    # plotting.heatmap(start_point, x / WAVELENGTH, y / WAVELENGTH, ax, cmap='alpha')
     # plotting.heatmap(minima, x / WAVELENGTH, y / WAVELENGTH, ax, cmap='alpha')
     n = 10
-
     def animate(i):
         global wavefunction, t
         wavefunction, com, rms = propagate(wavefunction, t, n)
@@ -46,14 +46,20 @@ def calcualte_and_plot(v=float('nan')):
         im_pot.set_data(generate_potential(t, v) / v_rec)
         probability_density = np.absolute(wavefunction) ** 2
         im_wave.set_data(probability_density)
-        im_wave.set_clim(np.max(probability_density), np.min(probability_density))
+        # im_wave.set_clim(np.max(probability_density), np.min(probability_density))
         print(com, rms)
+        print(np.sum(np.abs(wavefunction) ** 2))
+        print("Overlap with itself" + str(np.sum(np.abs(wavefunction ** 2))))
+        print("Overlap with (0, 0) Hermite" + str(
+            np.abs(np.sum(generate_hermite(0, 0, 128, 0) * wavefunction)) ** 2))
+
         print(probability_at_edges(wavefunction, 50), "left", probability_left_edge(wavefunction), "right",
               probability_right_edge(wavefunction), "up", probability_upper_edge(wavefunction), "down",
               probability_lower_edge(wavefunction))
-        return im_wave
+        return
 
-    # ani = animation.FuncAnimation(fig, animate, frames=200, repeat=True, interval=100)
+    ani = animation.FuncAnimation(fig, animate, frames=200, repeat=True, interval=100)
+    # ani.save("{}animation.gif".format("./"), writer='imagemagick', fps=10)
 
     # plt.show()
 
@@ -92,6 +98,20 @@ def save_com_to_file(steps, v=float('nan')):
                            str(probability_right_edge(wavef)) + "   " + str(probability_upper_edge(wavef)) + "   "
                            + str(probability_lower_edge(wavef)) + os.linesep)
 
+            hermite_num = 7
+            herm_otwell = np.zeros((hermite_num, hermite_num))
+            herm_orwell = np.zeros((hermite_num, hermite_num))
+            for i in np.arange(hermite_num):
+                for j in np.arange(hermite_num):
+                    herm_otwell[i, j] = np.abs(np.sum(generate_hermite(i, j, OTHER_MIN_X, OTHER_MIN_Y) * wavef)) ** 2
+                    herm_orwell[i, j] = np.abs(np.sum(generate_hermite(i, j, 0, 0) * wavef)) ** 2
+            p = Path("{}otwell".format(directory_to_save))
+            with p.open('ab') as f:
+                np.save(f, herm_otwell)
+            p = Path("{}orwell".format(directory_to_save))
+            with p.open('ab') as f:
+                np.save(f, herm_orwell)
+
             avg = np.array([0.0, 0.0])
 
         if t * omega - START > REPEATS * CUTOFF * path_map[PATH][1] and i % 100 == 99:
@@ -104,4 +124,3 @@ save_com_to_file(7000)
 # calcualte_and_plot()
 # expansion_with_different_potential_strengths(100, propagate, METHOD)
 print(time.time())
-# ani.save("{}animation.gif".format(directory), writer='imagemagick', fps=10)

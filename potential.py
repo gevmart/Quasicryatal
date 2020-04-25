@@ -658,6 +658,7 @@ def default_phases(x_t=x, y_t=y):
         angles *= 2
 
     kxs, kys = k * np.cos(angles), k * np.sin(angles)
+    # phases = np.array([0, 0, 0, 0]).repeat(GRID_SIZE ** 2).reshape(4, GRID_SIZE ** 2)
 
     return (np.outer(kxs, x_t - WAVEPACKET_CENTER_X) + np.outer(kys, y_t - WAVEPACKET_CENTER_Y))\
         .reshape(NUMBER_OF_LASERS, GRID_SIZE, GRID_SIZE) + (noise() if NOISE and started and not finished else 0)

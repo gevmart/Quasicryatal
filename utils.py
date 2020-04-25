@@ -99,3 +99,17 @@ def probability_lower_edge(wavefunction, edge_length=WAVELENGTH // 2):
     return np.sum(np.abs(wavefunction) ** 2) - \
            np.sum(np.abs(wavefunction[:, :-edge_length]) ** 2)
 
+
+def second_derivative(grid, x_0, y_0, along_y=False):
+    center_x = GRID_SIZE // 2 + x_0
+    center_y = GRID_SIZE // 2 + y_0
+    if along_y:
+        return grid[center_x, center_y + 1] - 2 * grid[center_x, center_y] + grid[center_x, center_y - 1]
+    return grid[center_x + 1, center_y] - 2 * grid[center_x, center_y] + grid[center_x - 1, center_y]
+    # if along_y:
+    #     return -1 / 12 * (grid[center_x, center_y + 2] - 16 * grid[center_x, center_y + 1]
+    #                       + 30 * grid[center_x, center_y] - 16 * grid[center_x, center_y - 1] + grid[center_x, center_y - 2])
+    #
+    # return -1 / 12 * (grid[center_x + 2, center_y] - 16 * grid[center_x + 1, center_y]
+    #                   + 30 * grid[center_x, center_y] - 16 * grid[center_x - 1, center_y] + grid[
+    #                       center_x - 2, center_y])
