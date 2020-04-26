@@ -8,6 +8,7 @@ from potential import potential
 def generate_hermite(n, m, x_0, y_0):
     omega_x = (second_derivative(potential, x_0, y_0, False) / 2 / M) ** 0.5
     omega_y = (second_derivative(potential, x_0, y_0, True) / 2 / M) ** 0.5
+    print("Omega over recoil " + str(omega_x / v_rec))
     hermite_x = generic_hermite(n, x - x_0, omega_x)
     hermite_y = generic_hermite(m, y - y_0, omega_y)
     return hermite_x * hermite_y

@@ -11,7 +11,7 @@ def read_and_parse_input(filename):
     return lines
 
 
-lines = read_and_parse_input("{}move_parallelogram_potential_2.5_x_0_y_0_cn_n_70_cutoff_490_grid_700_wavelength_80_timestep_0.2_lasernum_4_repeat_6_retroreflective_True_extended/data.txt"
+lines = read_and_parse_input("{}move_parallelogram_potential_2.5_x_0_y_0_cn_n_200_cutoff_1400_grid_700_wavelength_80_timestep_0.2_lasernum_4_repeat_6_retroreflective_True_extended/data.txt"
                              .format(PLOT_SAVE_DIR_BASE))
 
 idx_list = [idx + 1 for idx, val in enumerate(lines) if len(val.split("[")) == 1]

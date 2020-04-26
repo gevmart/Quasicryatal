@@ -13,6 +13,7 @@ from time_propagation_cn import propagate_cn
 from utils import *
 from testing_simulation import expansion_with_different_potential_strengths, expansion_without_potential
 from hermites import generate_hermite
+from generate_eigenstates import get_eigenstates
 
 # %%
 propagate = propagate_cn if METHOD == "cn" else propagate_ssf
@@ -28,7 +29,7 @@ def calcualte_and_plot(v=float('nan')):
     fig, ax = plt.subplots()
     im_pot = plotting.heatmap(generate_potential(0, v) / v_rec, x / WAVELENGTH, y / WAVELENGTH,
                               ax, cbarlabel="Potential / Recoil Energy", cmap=plt.cm.gray, fontsize=22)
-    im_wave = plotting.heatmap(np.absolute(wavepacket) ** 2, x / WAVELENGTH, y / WAVELENGTH, ax, cmap='alpha')
+    # im_wave = plotting.heatmap(np.absolute(wavepacket) ** 2, x / WAVELENGTH, y / WAVELENGTH, ax, cmap='alpha')
     plotting.annotate(fig, ax, "Starting point of modulation", r"$x/\lambda$", r"$y/\lambda$", fontsize=22)
     # start_point = np.zeros((GRID_SIZE, GRID_SIZE))
     # center_x = GRID_SIZE // 2 - (929 - WAVEPACKET_CENTER_X)
@@ -39,6 +40,18 @@ def calcualte_and_plot(v=float('nan')):
     # plotting.heatmap(start_point, x / WAVELENGTH, y / WAVELENGTH, ax, cmap='alpha')
     # plotting.heatmap(minima, x / WAVELENGTH, y / WAVELENGTH, ax, cmap='alpha')
     n = 10
+
+    num_of_eigenstates = 10
+    eigenstates_orwell = get_eigenstates()
+    eigenstates_otwell = get_eigenstates(center_x=OTHER_MIN_Y, center_y=OTHER_MIN_X)
+    herm_otwell = np.zeros(num_of_eigenstates)
+    herm_orwell = np.zeros(num_of_eigenstates)
+    for i in np.arange(num_of_eigenstates):
+        herm_orwell[i] = np.abs(np.sum(eigenstates_orwell[i] * wavefunction)) ** 2
+        herm_otwell[i] = np.abs(np.sum(eigenstates_otwell[i] * wavefunction)) ** 2
+    im_wave = plotting.heatmap(np.absolute(eigenstates_otwell[0]) ** 2, x / WAVELENGTH, y / WAVELENGTH, ax, cmap='alpha')
+    print(herm_orwell)
+    print(herm_otwell)
     def animate(i):
         global wavefunction, t
         wavefunction, com, rms = propagate(wavefunction, t, n)
@@ -58,7 +71,7 @@ def calcualte_and_plot(v=float('nan')):
               probability_lower_edge(wavefunction))
         return
 
-    ani = animation.FuncAnimation(fig, animate, frames=200, repeat=True, interval=100)
+    # ani = animation.FuncAnimation(fig, animate, frames=200, repeat=True, interval=100)
     # ani.save("{}animation.gif".format("./"), writer='imagemagick', fps=10)
 
     # plt.show()
@@ -75,6 +88,10 @@ def save_com_to_file(steps, v=float('nan')):
     wavef = wavepacket
     n = 10
     t = 0
+
+    num_of_eigenstates = 10
+    eigenstates_orwell = get_eigenstates()
+    eigenstates_otwell = get_eigenstates(center_x=OTHER_MIN_Y, center_y=OTHER_MIN_X)
 
     directory_to_save = "{}{}_potential_{}_x_{}_y_{}_{}_n_{}_cutoff_{}_grid_{}_wavelength_{}_timestep_{}_lasernum_{}_repeat_{}_retroreflective_{}/".format(PLOT_SAVE_DIR_BASE, PATH, V_0_REL / NUMBER_OF_LASERS, WAVEPACKET_CENTER_X, WAVEPACKET_CENTER_Y, METHOD,POTENTIAL_CHANGE_SPEED, CUTOFF, GRID_SIZE, WAVELENGTH, TIME_STEP_REL, NUMBER_OF_LASERS, REPEATS, not NON_RETROREFLECTIVE)
     copy_code(directory_to_save)
@@ -98,19 +115,18 @@ def save_com_to_file(steps, v=float('nan')):
                            str(probability_right_edge(wavef)) + "   " + str(probability_upper_edge(wavef)) + "   "
                            + str(probability_lower_edge(wavef)) + os.linesep)
 
-            hermite_num = 7
-            herm_otwell = np.zeros((hermite_num, hermite_num))
-            herm_orwell = np.zeros((hermite_num, hermite_num))
-            for i in np.arange(hermite_num):
-                for j in np.arange(hermite_num):
-                    herm_otwell[i, j] = np.abs(np.sum(generate_hermite(i, j, OTHER_MIN_X, OTHER_MIN_Y) * wavef)) ** 2
-                    herm_orwell[i, j] = np.abs(np.sum(generate_hermite(i, j, 0, 0) * wavef)) ** 2
-            p = Path("{}otwell".format(directory_to_save))
-            with p.open('ab') as f:
-                np.save(f, herm_otwell)
-            p = Path("{}orwell".format(directory_to_save))
-            with p.open('ab') as f:
-                np.save(f, herm_orwell)
+            if t * omega - START > REPEATS * CUTOFF * path_map[PATH][1]:
+                herm_otwell = np.zeros(num_of_eigenstates)
+                herm_orwell = np.zeros(num_of_eigenstates)
+                for i in np.arange(num_of_eigenstates):
+                    herm_orwell[i] = np.abs(np.sum(eigenstates_orwell[i] * wavef)) ** 2
+                    herm_otwell[i] = np.abs(np.sum(eigenstates_otwell[i] * wavef)) ** 2
+                p = Path("{}otwell".format(directory_to_save))
+                with p.open('ab') as f:
+                    np.save(f, herm_otwell)
+                p = Path("{}orwell".format(directory_to_save))
+                with p.open('ab') as f:
+                    np.save(f, herm_orwell)
 
             avg = np.array([0.0, 0.0])
 
